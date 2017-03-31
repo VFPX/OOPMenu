@@ -1,0 +1,23 @@
+<html>
+<head>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body topmargin=0 leftmargin=0>
+<table border=0 width="100%" bgcolor="lightblue" class="banner" cellspacing="3">
+<tr><td valign="center"><span style="FONT: 8pt Verdana" 
+     ><i><%= oHelp.cProjectname %></i></span></td></tr>
+<tr><td><span style="FONT: 10pt Verdana" 
+     ><b><%= TRIM(oHelp.oTopic.Topic) %></b></span>
+</td></tr>
+</table>
+<p>
+<table cellspacing="5"><tr><td class="body" style="BACKGROUND: white">
+<%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+</td></tr></table>
+<hr> 
+<small><center><%= IIF(!EMPTY(oHelp.cProjCompany),"&copy; " + oHelp.cProjCompany + ", " + TRANS( YEAR( date() )),"") %></center></small>
+<br clear="all">
+</body>
+</html>
+

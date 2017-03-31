@@ -1,0 +1,24 @@
+<html>
+<head>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body topmargin=0 leftmargin=0>
+<table border=0 width="100%" bgcolor="lightblue" class="banner">
+<tr><td><h2 style="color:white;font-size:18">No Project Selected</h2>
+</td></tr>
+</table>
+<div style="margin-left:10pt">
+<br><p>
+<div class="body">Currently there is no topic selected. If you're starting up for the first time:
+<UL>
+<LI> Click on the New Project Toolbar button
+<LI> Create a new project in a new directory
+<LI> Start adding topics
+<LI> Use the Text and Browser icons on the toolbar to switch between edit and preview modes.
+</UL>
+If you've created a help project earlier click on the Open toolbar button to open a project
+from disk or select one from the recently used project list.
+</div>
+</body>
+</html>

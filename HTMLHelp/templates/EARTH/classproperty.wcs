@@ -1,0 +1,61 @@
+<% lcSeeAlsoTopics = "" %>
+<html>
+<head>
+<topictype value="<%= TRIM(oHelp.oTopic.Type) %>"/>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body topmargin=0 leftmargin=0>
+<table border=0 width="100%" class="banner">
+<tr><td valign="center"><span style="font:8pt Verdana;color:white"><i><%= oHelp.cProjectname %></i></span></td></tr>
+<tr><td><img src="bmp/classproperty_open.gif"><span style="font:10pt Verdana;color:white;"><b><%= TRIM(oHelp.oTopic.Topic) %></b></span>
+</td></tr>
+</table>
+
+<div style="margin-left:10pt;margin-right:10pt">
+
+<% iif(!empty(oHelp.oTopic.Scope),"<b>Scope: " + TRIM(oHelp.oTopic.Scope)+"<b>",[]) %>
+<br><p>
+<div class="body"><%= oHelp.FormatHTML(oHelp.oTopic.Body) %></div>
+<p>
+
+<table border="0" cellpadding="3" width="97%" class=".body">
+<% IF !EMPTY(oHelp.oTopic.Parameters) %>    
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">
+      <%= IIF(oHelp.oTopic.Type="CLASSPROPERTY","Values","Parameters")%>:</td>
+    <td class="body">
+    <%= oHelp.FormatHTML(oHelp.oTopic.Parameters)%>
+    </td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Example) %>
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">Example:</td>
+    <td><pre><%= oHelp.FormatHTML(oHelp.oTopic.Example)%></pre>
+</td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Remarks) %>
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">Remarks:</td>
+    <td class="body"><%= oHelp.FormatHTML(oHelp.oTopic.Remarks)%>
+    </td>
+  </tr>
+<% ENDIF %>  
+</table>
+
+<% if !EMPTY(oHelp.oTopic.SeeAlso) %>
+<b>See also:</b>
+<div style="margin-left:10pt">
+<%= STRTRAN(oHelp.InsertSeeAlsoTopics(),"<BR>" + CHR(13) + CHR(10)," | ") %>
+</div>
+<%  endif %>
+</div>
+<p>
+<table width="100%" class="banner" style="color:white;"><tr><td>
+<small>Last Updated: <i><%= TTOD(oHelp.oTopic.Updated) %></i></small>
+</td></tr></table>
+<p>&nbsp;<br></p>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<% lcSeeAlsoTopics = oHelp.InsertSeeAlsoTopics() %>	
+<html>
+<head>
+<topictype value="<%= TRIM(oHelp.oTopic.Type) %>"/>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+<SCRIPT SRC="templates/wwhelp.js"></SCRIPT>
+</head>
+<body leftmargin=0 topmargin=0>
+
+<table border=0 width="100%" bgcolor="lightblue" class="banner" cellspacing="3">
+<tr><td valign="center">
+<% if !EMPTY(oHelp.oTopic.SeeAlso) %>
+	<span id="more" style="cursor:hand;color:darkblue" onclick="SeeAlsoButton();">
+	    <img src="bmp/seealso.gif" border=0  alt="Related Topics" style="Font:normal bold 6pt Symbol;cursor:Hand"></span>
+	</span>
+	<div id="SeeAlsoTopics" class="hotlinkbox" style="display:none" onmouseleave="SeeAlsoButton();">
+	<b>See also</b><br>
+	<span style="margin-left:10px;margin-top:15px"><%= lcSeeAlsoTopics %></span>
+	</div>
+<% endif %>
+<span style="font:8pt Verdana;font-style:italic"><%= oHelp.cProjectname %></span>
+</td></tr><tr><td>
+<span style="font:10pt Verdana;font-weight:bold">
+<img src="bmp/<%= TRIM(oHelp.oTopic.Type)%>.gif"> <%= oHelp.FormatHtml(TRIM(oHelp.oTopic.Topic)) %>
+</span>
+</td></tr>
+</table>
+
+<div class="contentpane">
+<br>
+<%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+<br><br>
+
+<table border="0" cellpadding="3" width="96%">
+<pre class="SyntaxBox">
+<%= oHelp.FormatHtml(oHelp.oTopic.Syntax) %>
+</pre>
+</table>
+
+<% IF !EMPTY(oHelp.oTopic.Remarks) %>
+<h3 class="outdent">Remarks</h3>
+<%= oHelp.FormatHTML(oHelp.oTopic.Remarks)%>
+<% ENDIF %>  
+
+<table border="0" cellpadding="3" width="95%">
+<% IF !EMPTY(oHelp.oTopic.Example) %>
+  <pre><%= oHelp.FormatHTML(oHelp.oTopic.Example)%></pre>
+<% ENDIF %>  
+</table>
+
+<h3 class="outdent">Properties, Events and Methods</h3>
+<br>
+<%= ClassMemberTableHtml(oHelp,.t.) %>
+
+
+<h3 class="outdent">Requirements</h3>
+   <% IF !EMPTY(oHelp.oTopic.Namespace) %>
+<b>Namespace:</b> <%= oHelp.oTopic.Namespace %><br>
+   <% endif %>
+   <% IF !EMPTY(oHelp.oTopic.Assembly) %>
+<b>Assembly:</b> <%= oHelp.oTopic.Assembly %>
+<br>
+   <% endif %>
+
+<% if !EMPTY(oHelp.oTopic.SeeAlso) %>
+<h3 class="outdent">See also</h3>
+<%= lcSeeAlsoTopics %>
+<%  endif %>
+<br>
+</div>
+<hr>
+<small>Last Updated: <i><%= TTOD(oHelp.oTopic.Updated) %></i></small>
+</body>
+</html>

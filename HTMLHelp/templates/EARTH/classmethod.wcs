@@ -1,0 +1,74 @@
+<% lcSeeAlsoTopics = ""%>
+<html>
+<head>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body topmargin=0 leftmargin=0>
+<table border=0 width="100%" class="banner">
+<tr><td valign="center"><span style="font:8pt Verdana;color:white"><i><%= oHelp.cProjectname %></i></span></td></tr>
+<tr><td><img src="bmp/classmethod_open.gif"> <span style="font:10pt Verdana;color:white;"><b><%= TRIM(oHelp.oTopic.Topic) %></b></span>
+</td></tr>
+</table>
+
+<div style="margin-left:10pt;margin-right=10pt">
+<p>
+<% iif(!empty(oHelp.oTopic.Scope),"<b>Scope: " + TRIM(oHelp.oTopic.Scope)+"<b>",[]) %>
+<br><p>
+<%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+<p>
+<table border="0" cellpadding="3" width="97%" class="body">
+<% IF !EMPTY(oHelp.oTopic.Syntax) %>
+  <tr>
+    <td width="100" valign="top" align="right" class="labels"><p align="right">Syntax:</td>
+    <td><pre><%= TRIM(oHelp.oTopic.Syntax) %></pre></td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Returns) %>    
+  <tr>
+    <td width="100" valign="top" align="right" class="labels">Return:</td>
+    <td><%= oHelp.FormatHTML(oHelp.oTopic.Returns)%></td>
+  </tr>
+<% ENDIF %>
+<% IF !EMPTY(oHelp.oTopic.Parameters) %>    
+  <tr>
+    <td width="100" valign="top" align="right" class="labels">
+      <%= IIF(oHelp.oTopic.Type="CLASSPROPERTY","Values","Parameters")%>:</td>
+    <td>
+    <%= oHelp.FormatHTML(oHelp.oTopic.Parameters)%>
+    </td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Example) %>
+  <tr>
+    <td width="100" valign="top" align="right" class="labels">Example:</td>
+    <td><pre><%= oHelp.FormatHTML(oHelp.oTopic.Example)%></pre>
+</td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Remarks) %>
+  <tr>
+    <td width="100" valign="top" align="right" class="labels">Remarks:</td>
+    <td><%= oHelp.FormatHTML(oHelp.oTopic.Remarks)%>
+    </td>
+  </tr>
+<% ENDIF %>  
+</table>
+<p>
+
+<% if !EMPTY(oHelp.oTopic.SeeAlso) %>
+<b>See also:</b>
+<div style="margin-left:10pt">
+<%= STRTRAN(oHelp.InsertSeeAlsoTopics(),"<BR>" + CHR(13) + CHR(10)," | ") %>
+</div>
+<%  endif %>
+<p>
+<%= InsertMethodOverloads(oHelp) %>
+</div>
+<p>
+<table width="100%" class="banner" style="color:white;"><tr><td>
+<small>Last Updated: <i><%= TTOD(oHelp.oTopic.Updated) %></i></small>
+</td></tr></table>
+<p>&nbsp;<br></p>
+</body>
+</html>

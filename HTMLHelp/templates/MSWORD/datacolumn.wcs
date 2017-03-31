@@ -1,0 +1,55 @@
+<% lcSeeAlsoTopics = ""%>
+<html>
+<head>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body>
+<h3><%= oHelp.oTopic.Topic %></h3>
+<div style="margin-left:10pt;margin-right=10pt">
+<br><p>
+<%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+<p>
+<table border="0" cellpadding="3" width="97%" class="body">
+<% IF !EMPTY(oHelp.oTopic.Syntax) %>
+  <tr>
+    <td width="100" valign="top" align="right" class="labels"><p align="right">Syntax:</td>
+    <td><pre><%= TRIM(oHelp.oTopic.Syntax) %></pre></td>
+  </tr>
+<% ENDIF %>  
+
+<% IF !EMPTY(oHelp.oTopic.Parameters) %>    
+  <tr>
+    <td width="100" valign="top" align="right" class="labels">
+     Data Type:
+	</td>
+    <td>
+    <%= oHelp.FormatHTML(oHelp.oTopic.Parameters)%>
+    </td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Returns) %>    
+  <tr>
+    <td width="100" valign="top" align="right" class="labels">Attributes:</td>
+    <td><%= oHelp.FormatHTML(oHelp.oTopic.Returns)%></td>
+  </tr>
+<% ENDIF %>
+<% IF !EMPTY(oHelp.oTopic.Example) %>
+  <tr>
+    <td width="100" valign="top" align="right" class="labels">Example:</td>
+    <td><pre><%= oHelp.FormatHTML(oHelp.oTopic.Example)%></pre>
+</td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Remarks) %>
+  <tr>
+    <td width="100" valign="top" align="right" class="labels">Remarks:</td>
+    <td><%= oHelp.FormatHTML(oHelp.oTopic.Remarks)%>
+    </td>
+  </tr>
+<% ENDIF %>  
+</table>
+<p>
+</div>
+</body>
+</html>

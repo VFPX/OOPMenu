@@ -1,0 +1,58 @@
+<html>
+<head>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body>
+<p>
+<TABLE WIDTH=99% BORDER=0 BGCOLOR=#EEEEEE><TR><TD ALIGN=CENTER>
+<h1><%= TRIM(oHelp.oTopic.Topic) %></h1>
+</TD></TR></Table>
+<br><p>
+<%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+<p>
+
+<%= IIF(VARTYPE(pcToc)="C",pcToc,"") %>
+<p>
+<%= oHelp.FormatHTML(oHelp.oTopic.Remarks)  %>
+
+<% 
+cCurrentPk = oHelp.oTopic.Pk
+cHTML = ""
+oTopics = oHelp.GetTopics("ARRAY","type # 'WHATSNEW'",;
+                          "updated DESC TOP 35","ParentPk,Pk") 
+
+If !ISNULL(oTopics) AND oTopics.nCount > 0 
+	cHTML = cHTML + "<H3>Recently updated topics</H3><p>"
+	cHTML = cHTML + "<table class='body' style='background:White' border=1 cellpadding=2 cellspacing=0 align='center'>"
+	cHTML = cHTML + "<tr style='color:white;background:black'><td><b> Name</b></td>"
+	cHTML = cHTML + "<td><b>Description</b></td>"
+
+	For lnLoop = 1 To oTopics.nCount
+		oHelp.LoadTopic(oTopics.aTopics[lnLoop,2])
+		cHTML = cHtml + "<tr><td Align = 'Left' VAlign = 'Top'>" + TopicLink(oHelp.oTopic.Topic,oHelp.oTopic.Topic) +;
+		                "<br>" + DTOC(oHelp.oTopic.Updated) + "<td Align ='Left' VAlign ='Top'>"  
+		
+		lcBody = oHelp.FormatHTML(oHelp.oTopic.Body)
+		nBreak = ATC("<p>",lcBody)
+		IF nBreak = 0
+		   nBreak = ATC("<br>",lcBody)
+		EndIf
+		IF nBreak > 1
+		   cHTML = cHTML + LEFT(lcBody,nBreak - 1)
+		ELSE
+		   cHTML = cHTML + lcBody
+        ENDIF		   
+
+		cHTML = cHTML + "</td></tr>"
+	EndFor
+	
+	oHelp.LoadTopic(cCurrentPk)
+	cHTML = cHTML + "</table><p>"
+	
+	Response.Write( cHTML )
+EndIf 
+%>
+
+</body>
+</html>

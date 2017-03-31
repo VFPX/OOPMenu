@@ -1,0 +1,62 @@
+<% lcSeeAlsoTopics = oHelp.InsertSeeAlsoTopics() %>	
+<html>
+<head>
+<topictype value="<%= TRIM(oHelp.oTopic.Type) %>"/>
+<topictype value="<%= TRIM(oHelp.oTopic.Type) %>"/>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body leftmargin=0 topmargin=0>
+<table border=0 width="100%" class="banner">
+<tr><td valign="center"><span style="font:8pt Verdana;color:white"><i><%= oHelp.cProjectname %></i></span></td></tr>
+<tr><td><img src="bmp/classheader.gif"> <span style="font:10pt Verdana;color:white;"><b><%= TRIM(oHelp.oTopic.Topic) %></b></span>
+</td></tr>
+</table>
+
+<div style="margin-left:10pt;margin-right=10pt">
+<p>
+<%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+<p>
+<% IF !EMPTY(oHelp.oTopic.Assembly) %>
+<b>Assembly:</b> <%= oHelp.oTopic.Assembly %><br>
+<% endif %>
+<% IF !EMPTY(oHelp.oTopic.Namespace) %>
+<b>Namespace:</b> <%= oHelp.oTopic.Namespace %><br>
+<% endif %>
+<% IF !EMPTY(oHelp.oTopic.Inh_Tree) %>
+<br><%= oHelp.oTopic.Inh_tree %><br>
+<% endif %>
+<p>
+<table border="0" cellpadding="3" width="99%" class=".body">
+<% IF !EMPTY(oHelp.oTopic.Example) %>
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">Example:</td>
+    <td><pre><%= oHelp.FormatHTML(oHelp.oTopic.Example)%></pre>
+</td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Remarks) %>
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">Remarks:</td>
+    <td class="body"><%= oHelp.FormatHTML(oHelp.oTopic.Remarks)%>
+    </td>
+  </tr>
+<% ENDIF %>  
+</table>
+
+<%= ClassMemberTableHtml(oHelp,.t.) %>
+
+<% if !EMPTY(oHelp.oTopic.SeeAlso) %>
+<b>See also:</b>
+<div style="margin-left:10pt">
+<%= STRTRAN(oHelp.InsertSeeAlsoTopics(),"<BR>" + CHR(13) + CHR(10)," | ") %>
+</div>
+<%  endif %>
+</div>
+<p>
+<table width="100%" class="banner" style="color:white;"><tr><td>
+<small>Last Updated: <i><%= TTOD(oHelp.oTopic.Updated) %></i></small>
+</td></tr></table>
+<p>&nbsp;<br></p>
+</body>
+</html>

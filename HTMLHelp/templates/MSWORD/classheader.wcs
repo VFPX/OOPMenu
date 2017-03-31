@@ -1,0 +1,52 @@
+<html>
+<head>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body>
+<h1><%= TRIM(oHelp.oTopic.Topic) %></h1>
+<%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+<p>
+<%= ClassMemberTableHtml(oHelp,.t.) %>
+
+<table border="0" cellpadding="3" width="99%" class=".body">
+<% IF !EMPTY(oHelp.oTopic.Example) %>
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">Example:</td>
+    <td><pre><b><%= oHelp.FormatHTML(oHelp.oTopic.Example)%></b></pre>
+</td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Remarks) %>
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">Remarks:</td>
+    <td class="body"><%= oHelp.FormatHTML(oHelp.oTopic.Remarks)%>
+    </td>
+  </tr>
+<% ENDIF %>  
+</table>
+<p>
+<% IF !EMPTY(oHelp.oTopic.Assembly) %>
+<b>Assembly:</b> <%= oHelp.oTopic.Assembly %><br>
+<% endif %>
+<% IF !EMPTY(oHelp.oTopic.Namespace) %>
+<b>Namespace:</b> <%= oHelp.oTopic.Namespace %><br>
+<% endif %>
+<% IF !EMPTY(oHelp.oTopic.Inh_Tree) %>
+<br>
+<b>Inherits from:</b><br>
+<%= oHelp.oTopic.Inh_tree %><br>
+<% endif %>
+<% IF !EMPTY(oHelp.oTopic.Implements) %>
+<br><b>Implements:</b><br>
+<%= STRTRAN(oHelp.oTopic.Implements,",",", ") %><br>
+<% endif %>
+
+<% if !EMPTY(oHelp.oTopic.SeeAlso) %>
+<b>See also:</b>
+<div style="margin-left:10pt">
+<%= lcSeeAlsoTopics %>
+</div>
+<%  endif %>
+</body>
+</html>

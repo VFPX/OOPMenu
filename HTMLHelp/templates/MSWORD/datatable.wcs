@@ -1,0 +1,90 @@
+<% lcSeeAlsoTopics = oHelp.InsertSeeAlsoTopics() %>	
+<html>
+<head>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body>
+<h2><%= oHelp.oTopic.Topic %></h2>
+
+<div style="margin-left:10pt;margin-right=10pt">
+<p>
+ <%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+<p>
+<table border="0" cellpadding="3" width="99%" class=".body">
+<% IF !EMPTY(oHelp.oTopic.Example) %>
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">Example:</td>
+    <td><pre><%= oHelp.FormatHTML(oHelp.oTopic.Example)%></pre>
+</td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Remarks) %>
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">Remarks:</td>
+    <td class="body"><%= oHelp.FormatHTML(oHelp.oTopic.Remarks)%>
+    </td>
+  </tr>
+<% ENDIF %>  
+</table>
+
+<% 
+cCurrentPk = oHelp.oTopic.Pk
+cHTML = ""
+cClass = Alltrim(oHelp.oTopic.Class) + "::" 
+oTopics = oHelp.GetTopics("ARRAY","ParentPK = '" + oHelp.oTopic.Pk + "' and INLIST(type,'DATACOLUMN')",;
+                          "type,uMethod","ParentPk,Pk,upper(method) as UMethod") 
+
+If !ISNULL(oTopics) AND oTopics.nCount > 0 
+	cHTML = cHTML + "<H3>Table Fields</H3><p>"
+	cHTML = cHTML + "<table border='1' cellpadding='3' style='border-color:whitesmoke' align='center'>"
+	cHTML = cHTML + "<tr><th Width ='155'>Field</td>"
+	cHTML = cHTML + "<th Width ='350'>Description</td></tr>"
+
+	For lnLoop = 1 To oTopics.nCount
+		oHelp.LoadTopic(oTopics.aTopics[lnLoop,2])
+		if lnLoop % 2 = 0
+		    cHTML = CHTML + "<tr bgcolor='lavender'>"
+		else 
+		    cHTML = CHTML + "<tr>"			
+		endif		
+		cHTML = cHtml + "<td Align='Left' VAlign='Top'>" 
+		
+		Do Case
+			Case oHelp.oTopic.Type="DATACOLUMN"
+				cHTML = cHTML + "<img src='bmp\DATAColumn.gif' align=left>"
+		EndCase
+		cHTML = cHtml + " " + TopicLink(oHelp.oTopic.Method,oHelp.oTopic.Topic) + "</td>"
+		cHTML = cHTML + "<td VAlign='Top'>"
+		
+		lcBody = oHelp.FormatHTML(oHelp.oTopic.Body)
+		nBreak = AT("<p>",lcBody)
+		IF nBreak = 0
+		   nBreak = AT("<br>",lcBody)
+		EndIf
+		IF nBreak > 1
+		   cHTML = cHTML + LEFT(lcBody,nBreak - 1)
+		ELSE
+		   cHTML = cHTML + lcBody
+		   cHTML = cHTML + "<br>" + CHR(13) + CHR(10) + "<b>" + oHelp.oTopic.Parameters + "</b>"
+        ENDIF		   
+	    	   
+		cHTML = cHTML + "</td></tr>"   +CHR(13) + CHR(10)
+	EndFor
+	
+	oHelp.LoadTopic(cCurrentPk)
+	cHTML = cHTML + "</table><p>"
+	
+	Response.Write( cHTML )
+EndIf 
+%>
+
+<% if !EMPTY(oHelp.oTopic.SeeAlso) %>
+<b>See also:</b>
+<div style="margin-left:10pt">
+<%= STRTRAN(lcSeeAlsoTopics,"<BR>" + CHR(13) + CHR(10)," | ") %>
+</div>
+<%  endif %>
+</div>
+</body>
+</html>

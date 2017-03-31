@@ -1,0 +1,18 @@
+<html>
+<head>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body>
+<p>
+<h1><%= TRIM(oHelp.oTopic.Topic) %></h1>
+<br><p>
+<%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+<p>
+
+<%= IIF(VARTYPE(pcToc)="C",pcToc,"") %>
+<p>
+<%= oHelp.FormatHTML(oHelp.oTopic.Remarks)  %>
+</body>
+</html>
+

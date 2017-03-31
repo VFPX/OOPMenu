@@ -1,0 +1,261 @@
+BODY
+{
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    BACKGROUND-IMAGE: none;
+    PADDING-TOP: 0pt;
+    BACKGROUND-REPEAT: repeat;
+    FONT-FAMILY: Verdana
+}
+PRE
+{
+    FONT-WEIGHT: normal;
+    FONT-SIZE: x-small;
+    BACKGROUND: #eeeeee;
+    COLOR: black;
+    FONT-FAMILY: Courier New
+}
+H1
+{
+    MARGIN-TOP: 0pt;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 16pt;
+    MARGIN-BOTTOM: 0pt;
+    PADDING-BOTTOM: 0px;
+    COLOR: navy;
+    PADDING-TOP: 0pt;
+    FONT-FAMILY: Verdana;
+    BACKGROUND-COLOR: #eeeeee;
+    TEXT-ALIGN: center
+}
+H2
+{
+    MARGIN-TOP: 0pt;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 12pt;
+    MARGIN-BOTTOM: 0pt;
+    PADDING-BOTTOM: 0pt;
+    COLOR: maroon;
+    PADDING-TOP: 0pt;
+    FONT-FAMILY: Verdana
+}
+H3
+{
+    MARGIN-TOP: 0pt;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 10pt;
+    MARGIN-BOTTOM: 0pt;
+    PADDING-BOTTOM: 0pt;
+    COLOR: navy;
+    PADDING-TOP: 0pt;
+    FONT-FAMILY: Verdana
+}
+.header1
+{
+    MARGIN-TOP: 0pt;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 16pt;
+    MARGIN-BOTTOM: 0pt;
+    PADDING-BOTTOM: 0px;
+    COLOR: darkred;
+    PADDING-TOP: 0pt;
+    FONT-FAMILY: Verdana;
+    BACKGROUND-COLOR: #eeeeee;
+    TEXT-ALIGN: center
+}
+.header2
+{
+    MARGIN-TOP: 0pt;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 14pt;
+    MARGIN-BOTTOM: 0pt;
+    PADDING-BOTTOM: 0px;
+    COLOR: darkblue;
+    PADDING-TOP: 0pt;
+    FONT-FAMILY: Verdana
+}
+.header3
+{
+    MARGIN-TOP: 0pt;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 11pt;
+    MARGIN-BOTTOM: 0pt;
+    PADDING-BOTTOM: 0pt;
+    COLOR: black;
+    PADDING-TOP: 0pt;
+    FONT-FAMILY: Verdana
+}
+.labels
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 8pt;
+    FONT-FAMILY: Verdana
+}
+.code
+{
+    FONT-WEIGHT: bold;
+    FONT-SIZE: x-small;
+    BACKGROUND-IMAGE: none;
+    COLOR: darkred;
+    BACKGROUND-REPEAT: repeat;
+    FONT-FAMILY: Courier New;
+    BACKGROUND-COLOR: transparent
+}
+H4
+{
+    MARGIN-TOP: 0pt;
+    FONT-WEIGHT: 800;
+    FONT-SIZE: 10pt;
+    MARGIN-BOTTOM: 0pt;
+    PADDING-BOTTOM: 0pt;
+    COLOR: black;
+    PADDING-TOP: 0pt;
+    FONT-FAMILY: Verdana
+}
+.tocbody
+{
+    FONT-SIZE: 8pt;
+    FONT-FAMILY: Verdana;
+    BACKGROUND-COLOR: transparent
+}
+TD
+{
+    FONT-SIZE: 8pt;
+    FONT-FAMILY: Verdana
+}
+TH
+{
+    BACKGROUND: saddlebrown;
+    COLOR: white;
+    HEIGHT: 20px
+}
+TABLE
+{ 
+
+    font-name: Verdana;
+    FONT-SIZE: 8pt;
+    x-Color: Gray;
+    BORDER-COLLAPSE: collapse;
+}
+.banner
+{
+    BORDER-RIGHT: 1px outset;
+    BORDER-TOP: medium none;
+    FONT-SIZE: 10pt;
+    BORDER-LEFT: medium none;
+    BORDER-BOTTOM: 1px outset;
+    FONT-FAMILY: Verdana;
+    BACKGROUND-COLOR: saddlebrown;
+    color: White;
+}
+
+/* General code parsing */
+.codec1
+{color: blue;}
+.codec2  /* Keywords */
+{color: blue;font-weight:bold;}
+.codec3
+{color: blue;}
+.codec4
+{color: blue;}
+.codec5  / * literal */
+{color: brown;}
+.codec6
+{color: blue;}
+.codec7
+{color: red;}
+.codec8
+{color: blue;}
+.codec9
+{color: blue;}
+.codec10
+{color: blue;}
+
+.codecomment
+{color: green; }
+
+.codestring
+{background-color:  #Gray; }
+
+.codestrong {
+   border: black solid  1px;
+   background-color: #FFD700;
+   padding-left:1px;
+   padding-right:1px;
+}
+
+.codestrike {
+ text-decoration: line-through;
+}
+
+
+/* General code parsing */
+.codec1
+{color: blue;}
+.codec2  /* Keywords */
+{color: blue;font-weight:bold;}
+.codec3
+{color: blue;}
+.codec4
+{color: blue;}
+.codec5  / * literal */
+{color: YELLOW;}
+.codec6
+{color: blue;}
+.codec7
+{color: blue;}
+.codec8
+{color: blue;}
+.codec9
+{color: blue;}
+.codec10
+{color: blue;}
+
+.codecomment
+{color: green; }
+
+.codestring
+{background-color:  #Gray; }
+
+.codestrong {
+   border: black solid  1px;
+   background-color: #FFD700;
+   padding-left:1px;
+   padding-right:1px;
+}
+
+.codestrike {
+ text-decoration: line-through;
+}
+
+/* custom language styles that are attached to the wordfile.txt languages */
+.vfpcode .programcontrol {color: blue;}
+.vfpcode .functions {color: blue;}
+.vfpcode .commands {color: blue;} 
+.vfpcode .methods {color: blue;} 
+.vfpcode .properties {color: blue; }
+.vfpcode .classes {color: red; font-size: 120%; font-variant: small-caps;} 
+.vfpcode .events {color: #483D8B;} 
+.vfpcode .systemvars {color: blue;}
+
+.vbcode .constants {color: blue; font-face: bold}
+.vbcode .datatypes {color: darkblue;font-face: bold}
+.vbcode .keywords {color: blue;} 
+.vbcode .statements {color: blue;} 
+.vbcode .functions {color: blue; }
+.vbcode .depracated {color: grey; font-size: 120%; font-variant: small-caps;} 
+
+.csharpcode .programcontrol {color: blue;}
+.csharpcode .datatypes {color: blue; }
+.csharpcode .literals {color: darkblue; } 
+.csharpcode .operators {color:blue;} 
+.csharpcode .preprocessor {color: lightblue;} 
+
+.htmlcode .elements {color: blue; }
+.htmlcode .attributes {color: red; }
+.htmlcode .codestring { color: black; background: WhiteSmoke; }
+
+.xmlcode .elements {color: blue; }
+.xmlcode .attributes {color: red; }
+.xmlcode .commands {color: darkred; font-weight:bold }
+.xmlcode .codestring { color: black; background: WhiteSmoke; }

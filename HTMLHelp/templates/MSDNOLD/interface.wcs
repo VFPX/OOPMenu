@@ -1,0 +1,61 @@
+<% lcSeeAlsoTopics = oHelp.InsertSeeAlsoTopics() %>	
+<html>
+<head>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body leftmargin=0 topmargin=0>
+<table border=0 width="100%" bgcolor="lightblue" class="banner" cellspacing="3">
+<tr><td valign="center"><% if !EMPTY(oHelp.oTopic.SeeAlso) %>
+	<span  id="more" style="cursor:hand;color:darkblue"
+	    OnClick="SeeAlsoTopics.style.display='';more.style.display='none';less.style.display='';">
+	    <img src="bmp/seealso.gif" border=0  alt="Related Topics" style="Font:normal bold 6pt Symbol;cursor:Hand"></span>
+	</span>
+
+	<span  id="less" style="display:none"
+	      OnClick="SeeAlsoTopics.style.display='none';more.style.display='';less.style.display='none'">
+	<img src="bmp/seealso.gif" border=0 style="Font:normal bold 6pt Symbol;cursor:Hand"></span>
+	</span>
+	<div id="SeeAlsoTopics" STYLE="Display:None;margin-left:10pt">
+	<%= lcSeeAlsoTopics %>
+	</div>
+<% endif %><span style="font:8pt Verdana"><i><%= oHelp.cProjectname %></i></span></td></tr>
+<tr><td><span style="font:10pt Verdana"><img src="bmp/interface.gif"> <b><%= TRIM(oHelp.oTopic.Topic) %></b></span>
+</td></tr>
+</table>
+
+<div style="margin-left:10pt;margin-right=10pt">
+<br>
+ <%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+<p>
+<table border="0" cellpadding="3" width="99%">
+<% IF !EMPTY(oHelp.oTopic.Example) %>
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">Example:</td>
+    <td><pre><%= oHelp.FormatHTML(oHelp.oTopic.Example)%></pre>
+</td>
+  </tr>
+<% ENDIF %>  
+<% IF !EMPTY(oHelp.oTopic.Remarks) %>
+  <tr>
+    <td width="122" valign="top" align="right" class="labels">Remarks:</td>
+    <td><%= oHelp.FormatHTML(oHelp.oTopic.Remarks)%>
+    </td>
+  </tr>
+<% ENDIF %>  
+</table>
+
+<%= ClassMemberTableHtml(oHelp,.t.) %>
+
+<% if !EMPTY(oHelp.oTopic.SeeAlso) %>
+<b>See also:</b>
+<div style="margin-left:10pt">
+<%= STRTRAN(lcSeeAlsoTopics,"<BR>" + CHR(13) + CHR(10)," | ") %>
+</div>
+<%  endif %>
+
+</div>
+<hr>
+<small>Last Updated: <i><%= TTOD(oHelp.oTopic.Updated) %></i></small>
+</body>
+</html>

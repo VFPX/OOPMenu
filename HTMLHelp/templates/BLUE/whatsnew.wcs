@@ -1,0 +1,74 @@
+<html>
+<head>
+<title><%= TRIM(oHelp.oTopic.Topic) %></title>
+<LINK rel="stylesheet" type="text/css" href="templates/wwhelp.css">
+</head>
+<body topmargin=0 leftmargin=0>
+<table border=0 width="100%" class="banner">
+<tr><td valign="center"><span style="font:8pt Verdana;color:white"><i><%= oHelp.cProjectname %></i></span></td></tr>
+<tr><td><span style="font:10pt Verdana;color:white;"><b><%= TRIM(oHelp.oTopic.Topic) %></b></span>
+</td></tr>
+</table>
+
+<div style="margin-left:10pt;margin-right=10pt">
+
+<%= oHelp.FormatHTML(oHelp.oTopic.Body) %>
+<p>
+
+<%= IIF(VARTYPE(pcToc)="C",pcToc,"") %>
+<p>
+<%= oHelp.FormatHTML(oHelp.oTopic.Remarks)  %>
+
+<% 
+cCurrentPk = oHelp.oTopic.Pk
+cHTML = ""
+oTopics = oHelp.GetTopics("ARRAY","type # 'WHATSNEW'",;
+                          "updated DESC TOP 35","ParentPk,Pk") 
+
+If !ISNULL(oTopics) AND oTopics.nCount > 0 
+	cHTML = cHTML + "<H3>Recently updated topics</H3><p>"
+	cHTML = cHTML + "<table class='body' style='background:White' border=1 cellpadding=2 cellspacing=0 align='center'>"
+	cHTML = cHTML + "<tr style='color:white;background:SteelBlue'><td><b> Name</b></td>"
+	cHTML = cHTML + "<td><b>Description</b></td>"
+
+	For lnLoop = 1 To oTopics.nCount
+		oHelp.LoadTopic(oTopics.aTopics[lnLoop,2])
+		cHTML = cHtml + "<tr><td Align = 'Left' VAlign = 'Top'>" + TopicLink(oHelp.oTopic.Topic,oHelp.oTopic.Topic) +;
+		                "<br>" + DTOC(oHelp.oTopic.Updated) + "<td Align ='Left' VAlign ='Top'>"  
+		
+		lcBody = oHelp.FormatHTML(oHelp.oTopic.Body)
+		nBreak = ATC("<p>",lcBody)
+		IF nBreak = 0
+		   nBreak = ATC("<br>",lcBody)
+		EndIf
+		IF nBreak > 1
+		   cHTML = cHTML + LEFT(lcBody,nBreak - 1)
+		ELSE
+		   cHTML = cHTML + lcBody
+        ENDIF		   
+
+		cHTML = cHTML + "</td></tr>"
+	EndFor
+	
+	oHelp.LoadTopic(cCurrentPk)
+	cHTML = cHTML + "</table><p>"
+	
+	Response.Write( cHTML )
+EndIf 
+%>
+
+<% if !EMPTY(oHelp.oTopic.SeeAlso) %>
+<b>See also:</b>
+<div style="margin-left:10pt">
+<%= STRTRAN(oHelp.InsertSeeAlsoTopics(),"<BR>" + CHR(13) + CHR(10)," | ") %>
+</div>
+<%  endif %>
+</div>
+<p>
+<table width="100%" class="banner" style="color:white;"><tr><td>
+<small>Last Updated: <i><%= TTOD(oHelp.oTopic.Updated) %></i></small>
+</td></tr></table>
+<p>&nbsp;<br></p>
+
+</body>
+</html>
