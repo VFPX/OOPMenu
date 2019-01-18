@@ -22,12 +22,14 @@ The goals for this project are:
 
 * Provide menu factory tools that make it easy to implement such a menu system in an existing application. Some examples are:
 
-* A factory that opens an MNX file and based on the values in each record, instantiates menu objects and assigns their properties accordingly.
+    * A factory that opens an MNX file and based on the values in each record, instantiates menu objects and assigns their properties accordingly.
 
-* Similar to the previous point, a factory that opens another type of data store for menu definitions: a different table structure than an MNX, an XML file, etc.
+    * Similar to the previous point, a factory that opens another type of data store for menu definitions: a different table structure than an MNX, an XML file, etc.
 
-* A utility that reads an MNX file and generates code that acts as a hard-coded factory, such as the GENMENUX driver written by Mike and Toni Feltman. The benefit of this is current code that runs a menu (DO MyMenu.MPR) wouldn't change, since the MPR has been replaced with one that uses the menu objects.
+    * A utility that reads an MNX file and generates code that acts as a hard-coded factory, such as the GENMENUX driver written by Mike and Toni Feltman. The benefit of this is current code that runs a menu (DO MyMenu.MPR) wouldn't change, since the MPR has been replaced with one that uses the menu objects.
 
 * Separate the user interface of a menu (menu, pads, and bars) from the functionality. This allows individual menu components (a particular bar or even an entire pad, such as Edit) to be reused and integrated with other objects, such as toolbars, TreeViews, etc.
 
 * Create documentation and samples for all of the components so developers can quickly learn how to use the system.
+
+See the files in the Documentation folder, starting with [Overview of the Classes](Documentation/Overview.md). See [Converting Existing Menus](Documentation/Converting%20Existing%20Menus.md) for details on converting existing MNX-based menus to classes.o

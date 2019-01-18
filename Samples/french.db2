@@ -57,5 +57,37 @@
 		</FIELD>
 	</FIELDS>
 
+
+
+	<RECORDS>
+
+		<RECORD>
+			<ENGLISH>\&lt;File</ENGLISH>
+			<FRENCH>\&lt;Fichier</FRENCH>
+		</RECORD>
+
+		<RECORD>
+			<ENGLISH>\&lt;New...</ENGLISH>
+			<FRENCH>\&lt;Nouveau...</FRENCH>
+		</RECORD>
+
+		<RECORD>
+			<ENGLISH>\&lt;Open...</ENGLISH>
+			<FRENCH>\&lt;Ouvrir...</FRENCH>
+		</RECORD>
+
+		<RECORD>
+			<ENGLISH>E\&lt;xit</ENGLISH>
+			<FRENCH>\&lt;Sortie</FRENCH>
+		</RECORD>
+
+		<RECORD>
+			<ENGLISH>\&lt;Change to French</ENGLISH>
+			<FRENCH>\&lt;Changer à Anglais</FRENCH>
+		</RECORD>
+
+	</RECORDS>
+
+
 </TABLE>
 

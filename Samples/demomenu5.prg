@@ -1,13 +1,21 @@
-public oMenu
-set path to ..\source
-oMenu = newobject('SFMenu', 'SFMenu.vcx', '', 'oMenu')
-
 * Create a collection of menu/toolbar implementation objects.
 
 public oFunctions
+set path to ..\source
 oFunctions = createobject('Collection')
 oFunctions.Add(newobject('MyOpenFunction', 'MyMenu.vcx'), 'FileOpenFunction')
 oFunctions.Add(newobject('MyNewFunction',  'MyMenu.vcx'), 'FileNewFunction')
+
+* Run the test form.
+
+public oTestForm
+do form TestForm name oTestForm noshow
+
+* Create the menu.
+
+public oMenu
+oMenu = newobject('SFMenu', 'SFMenu.vcx', '', 'oMenu')
+oMenu.cFormName = oTestForm.Name
 
 * Create the File pad.
 
@@ -51,15 +59,10 @@ endwith
 
 oMenu.AddPad('SFEditPad', 'SFMenu.vcx', 'EditPad')
 
-* Display the menu.
+* Display the form.
 
 messagebox('This demo shows using an implementation object to coordinate ' + ;
 	'menu and toolbar items.' + chr(13) + chr(13) + ;
-	"After you're done viewing the " + ;
-	'menu, choose File, Exit or type oMenu.Release() in the Command window.')
+	"After you're done viewing the form, choose File, Exit.")
 oMenu.Show()
-
-* Run the test form.
-
-public oTestForm
-do form TestForm name oTestForm
+oTestForm.Show()

@@ -1,6 +1,5 @@
 LOCAL CRLF
 CRLF = CHR(13) + CHR(10)
-_out = []
 
  lcSeeAlsoTopics = oHelp.InsertSeeAlsoTopics() 
 Response.Write([]+ CRLF +;
@@ -26,11 +25,9 @@ Response.Write([</title>]+ CRLF +;
  if !EMPTY(oHelp.oTopic.SeeAlso) 
 Response.Write([]+ CRLF +;
    [	<span id="more" style="cursor:hand;" onclick="SeeAlsoButton();">]+ CRLF +;
-   [		 <img src="bmp/seealso.gif" border=0  alt="Related Topics" ] + ;
- [style="Font:cursor:Hand">]+ CRLF +;
+   [		 <img src="bmp/seealso.gif" border=0  alt="Related Topics" style="Font:cursor:Hand">]+ CRLF +;
    [	</span>]+ CRLF +;
-   [	<div id="SeeAlsoTopics" class="hotlinkbox" style="display:none" ] + ;
- [onmouseleave="SeeAlsoButton();">]+ CRLF +;
+   [	<div id="SeeAlsoTopics" class="hotlinkbox" style="display:none" onmouseleave="SeeAlsoButton();">]+ CRLF +;
    [	<b>See also</b><br>]+ CRLF +;
    [	<span style="margin-left:10px;margin-top:15px">])
 

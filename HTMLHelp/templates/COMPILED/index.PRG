@@ -1,6 +1,5 @@
 LOCAL CRLF
 CRLF = CHR(13) + CHR(10)
-_out = []
 
  lcSeeAlsoTopics = oHelp.InsertSeeAlsoTopics() 
 Response.Write([]+ CRLF +;
@@ -27,11 +26,9 @@ Response.Write([</title>]+ CRLF +;
  if !EMPTY(oHelp.oTopic.SeeAlso) 
 Response.Write([]+ CRLF +;
    [	<span id="more" style="cursor:hand;color:darkblue" onclick="SeeAlsoButton();">]+ CRLF +;
-   [		 <img src="bmp/seealso.gif" border=0  alt="Related Topics" style="Font:normal ] + ;
- [bold 6pt Symbol;cursor:Hand"></span>]+ CRLF +;
+   [		 <img src="bmp/seealso.gif" border=0  alt="Related Topics" style="Font:normal bold 6pt Symbol;cursor:Hand"></span>]+ CRLF +;
    [	</span>]+ CRLF +;
-   [	<div id="SeeAlsoTopics" class="hotlinkbox" style="display:none" ] + ;
- [onmouseleave="SeeAlsoButton();">]+ CRLF +;
+   [	<div id="SeeAlsoTopics" class="hotlinkbox" style="display:none" onmouseleave="SeeAlsoButton();">]+ CRLF +;
    [	<b>See also</b><br>]+ CRLF +;
    [	<span style="margin-left:10px;margin-top:15px">])
 
@@ -97,8 +94,7 @@ Response.Write([]+ CRLF +;
    [<hr>]+ CRLF +;
    [<small><center>])
 
-Response.Write(TRANSFORM( EVALUATE([ IIF(!EMPTY(oHelp.cProjCompany),"&copy; " + oHelp.cProjCompany + ", " + TRANS( ] + ;
- [YEAR( date() )),"")]) ))
+Response.Write(TRANSFORM( EVALUATE([ IIF(!EMPTY(oHelp.cProjCompany),"&copy; " + oHelp.cProjCompany + ", " + TRANS( YEAR( date() )),"") ]) ))
 
 Response.Write([</center></small>]+ CRLF +;
    [<br clear="all">]+ CRLF +;

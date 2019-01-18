@@ -29,6 +29,7 @@ DEFINE CLASS form1 AS form
 	Caption = "Form1"
 	DoCreate = .T.
 	Name = "Form1"
+	ShowWindow = 2
 
 	ADD OBJECT 'Check1' AS checkbox WITH ;
 		Alignment = 0, ;
