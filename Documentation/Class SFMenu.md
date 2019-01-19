@@ -1,6 +1,6 @@
 # Class SFMenu
 
-**Parent Class: [SFMenuBase](Class SFMenuBase.md)**
+**Parent Class: [SFMenuBase](Class%20SFMenuBase.md)**
 
 The top-level class of a menu hierarchy. A menu consists of pads, which are represented by SFPad objects. Pads, in turn, consist of bars, which are represented by SFBar objects. A bar may have a submenu, so it too can contain bars.
 

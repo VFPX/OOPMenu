@@ -5,7 +5,7 @@
 *< FOXBIN2PRG: Version="1.19" SourceFile="mymenu.vcx" /> (Solo para binarios VFP 9 / Only for VFP 9 binaries)
 *
 *
-DEFINE CLASS myfileexitbar AS sfbar OF "sfmenu.vcx" 
+DEFINE CLASS myfileexitbar AS sfbar OF "..\source\sfmenu.vcx" 
  	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
 
 	ccaption = E\<xit
@@ -19,7 +19,7 @@ DEFINE CLASS myfileexitbar AS sfbar OF "sfmenu.vcx"
 
 ENDDEFINE
 
-DEFINE CLASS myfilenewbar AS sfbar OF "sfmenu.vcx" 
+DEFINE CLASS myfilenewbar AS sfbar OF "..\source\sfmenu.vcx" 
  	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
 
 	ccaption = \<New...
@@ -36,7 +36,7 @@ DEFINE CLASS myfilenewbar AS sfbar OF "sfmenu.vcx"
 
 ENDDEFINE
 
-DEFINE CLASS myfileopenbar AS sfbar OF "sfmenu.vcx" 
+DEFINE CLASS myfileopenbar AS sfbar OF "..\source\sfmenu.vcx" 
  	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
 
 	ccaption = \<Open...
@@ -53,7 +53,7 @@ DEFINE CLASS myfileopenbar AS sfbar OF "sfmenu.vcx"
 
 ENDDEFINE
 
-DEFINE CLASS myfilepad AS sfpad OF "sfmenu.vcx" 
+DEFINE CLASS myfilepad AS sfpad OF "..\source\sfmenu.vcx" 
  	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
 
 	ccaption = \<File
@@ -73,7 +73,7 @@ DEFINE CLASS myfilepad AS sfpad OF "sfmenu.vcx"
 
 ENDDEFINE
 
-DEFINE CLASS mymenu AS sfmenu OF "sfmenu.vcx" 
+DEFINE CLASS mymenu AS sfmenu OF "..\source\sfmenu.vcx" 
  	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
 
 	Name = "mymenu"
