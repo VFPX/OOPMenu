@@ -21,6 +21,7 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		*m: hide		&& Hides the bar
 		*m: lmarked_assign
 		*m: lvisible_assign
+		*m: nbarnumber_assign
 		*m: oimplementation_assign
 		*m: refresh		&& Refreshes the bar
 		*m: setenabled		&& Sets the Enabled property to the match the implementation object's
@@ -42,17 +43,22 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		*p: cpictureresource		&& The system menu bar name for the picture to use
 		*p: cpopupname		&& The name of the popup this bar belongs to
 		*p: cpopupnamethis		&& The name of the popup this bar uses for submenus
+		*p: csavedpopupname		&& The saved popup name (used if the bar is used in both a menu and a shortcut menu)
 		*p: cskipfor		&& The SKIP FOR clause for the bar
 		*p: cstatusbartext		&& The text displayed in the status bar when this bar is highlighted
 		*p: csystembar		&& The name of the VFP system menu bar if this is one of those
+		*p: lbold		&& .T. to display the bar in bold
 		*p: ldefined		&& .T. if the menu bar for this object has been defined
 		*p: lenabled		&& .T. if the bar is enabled
 		*p: linvert		&& .T. to make this an inverted bar
 		*p: lmarked		&& .T. if the bar is marked
 		*p: lmru		&& .T. to add an MRU bar at the bottom of the submenu
+		*p: lshortcut		&& .T. if the bar is in a shortcut menu
 		*p: lspecified		&& .T. if the bar number is specified at a certain position
 		*p: lvisible		&& .T. if the bar should be visible
 		*p: nbarnumber		&& The number of the bar
+		*p: nbarposition		&& The actual bar number to use (may be adjusted by system bars)
+		*p: nsavedbarnumber		&& The saved bar number (used if the bar is used in both a menu and a shortcut menu)
 		*p: nseparatorbarcount		&& The number of separator bars in the menu
 		*p: oimplementation		&& A reference to an implementation object
 		*p: oparent		&& A reference to the parent for this bar
@@ -75,18 +81,23 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 	cpictureresource = 		&& The system menu bar name for the picture to use
 	cpopupname = 		&& The name of the popup this bar belongs to
 	cpopupnamethis = 		&& The name of the popup this bar uses for submenus
+	csavedpopupname = 		&& The saved popup name (used if the bar is used in both a menu and a shortcut menu)
 	cskipfor = not This.Allow()		&& The SKIP FOR clause for the bar
 	cstatusbartext = 		&& The text displayed in the status bar when this bar is highlighted
 	csystembar = 		&& The name of the VFP system menu bar if this is one of those
+	lbold = .F.		&& .T. to display the bar in bold
 	ldefined = .F.		&& .T. if the menu bar for this object has been defined
 	lenabled = .T.		&& .T. if the bar is enabled
 	linvert = .F.		&& .T. to make this an inverted bar
 	lmarked = .F.		&& .T. if the bar is marked
 	lmru = .F.		&& .T. to add an MRU bar at the bottom of the submenu
+	lshortcut = .F.		&& .T. if the bar is in a shortcut menu
 	lspecified = .F.		&& .T. if the bar number is specified at a certain position
 	lvisible = .T.		&& .T. if the bar should be visible
 	Name = "sfbar"
 	nbarnumber = 0		&& The number of the bar
+	nbarposition = 0		&& The actual bar number to use (may be adjusted by system bars)
+	nsavedbarnumber = 0		&& The saved bar number (used if the bar is used in both a menu and a shortcut menu)
 	nseparatorbarcount = 0		&& The number of separator bars in the menu
 	oimplementation = .NULL.		&& A reference to an implementation object
 	oparent = .NULL.		&& A reference to the parent for this bar
@@ -138,6 +149,12 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		<memberdata name="setvisible" display="SetVisible"/>
 		<memberdata name="cmrubarclass" display="cMRUBarClass"/>
 		<memberdata name="cmrubarlibrary" display="cMRUBarLibrary"/>
+		<memberdata name="nbarposition" display="nBarPosition"/>
+		<memberdata name="nbarnumber_assign" display="nBarNumber_Assign"/>
+		<memberdata name="lbold" display="lBold"/>
+		<memberdata name="nsavedbarnumber" display="nSavedBarNumber"/>
+		<memberdata name="csavedpopupname" display="cSavedPopupName"/>
+		<memberdata name="lshortcut" display="lShortcut"/>
 		</VFPData>
 	
 	PROCEDURE addbar		&& Adds a bar to the submenu popup for this bar
@@ -266,9 +283,10 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		local lcPopupName, ;
 			lcPadPath, ;
 			lcBarPath, ;
+			lcBarNumber, ;
 			llSystemBar, ;
 			lcCaption, ;
-			lcBarNumber, ;
+			lcExpression, ;
 			lcSkipFor, ;
 			lcBarPosition, ;
 			lcBarName, ;
@@ -276,6 +294,8 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 			loBar, ;
 			lnBar, ;
 			lcClauses, ;
+			lcKey, ;
+			lcKeyText, ;
 			lcPopupNameThis
 		with This
 			if vartype(.oParent) = 'O'
@@ -287,55 +307,79 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		* Get the bar number based on whether we're a system bar or not.
 		
 				if empty(.cSystemBar)
-					lcBarNumber = transform(.nBarNumber)
+					lcBarNumber = transform(.nBarPosition)
 				else
-					lcBarNumber = transform(evaluate(.cSystemBar))
+					lcBarNumber = .cSystemBar
 					llSystemBar = .T.
 				endif empty(.cSystemBar)
 		
+		* If the caption contains an expression, evaluate it.
+		
+				lcCaption = .cCaption
+				if ('<<' $ lcCaption and '>>' $ lcCaption) or ;
+					('{' $ lcCaption and '}' $ lcCaption)
+					lcExpression = strtran(lcCaption, '{', '<<')
+					lcExpression = strtran(lcCaption, '}', '>>')
+					try
+						lcCaption = textmerge(alltrim(lcExpression))
+					catch
+					endtry
+				endif ('<<' $ lcCaption and '>>' $ lcCaption) ...
+		
 		* Replace & with \< in the caption.
 		
-				lcCaption = strtran(.cCaption, '&', '\<')
+				lcCaption = strtran(lcCaption, '&', '\<')
 		
-		* Create a default status bar text if we don't have one.
+		* If this isn't a separator bar, process some things. First, create a default
+		* status bar text if we don't have one.
 		
-				if empty(.cStatusBarText)
-					.cStatusBarText = strtran(strtran(lcCaption, '\<'), '\')
-				endif empty(.cStatusBarText)
+				if lcCaption <> '\-'
+					if empty(.cStatusBarText)
+						.cStatusBarText = strtran(strtran(lcCaption, '\<'), '\')
+					endif empty(.cStatusBarText)
 		
 		* Set the SKIP FOR for the bar.
 		
-				lcSkipFor = 'not ' + lcBarPath + 'lEnabled'
-				if not empty(.cSkipFor)
-					lcSkipFor = lcSkipFor + ' or ' + ;
-						strtran(strtran(.cSkipFor, 'This.oParent.', lcPadPath), ;
-							'This.', lcBarPath)
-				endif not empty(.cSkipFor)
+					lcSkipFor = 'skip for not ' + lcBarPath + 'lEnabled'
+					if not empty(.cSkipFor)
+						lcSkipFor = lcSkipFor + ' or ' + ;
+							strtran(strtran(.cSkipFor, 'This.oParent.', lcPadPath), ;
+								'This.', lcBarPath)
+					endif not empty(.cSkipFor)
+		
+		* If this is a separator bar, there's no SKIP FOR.
+		
+				else
+					lcSkipFor = ''
+				endif lcCaption <> '\-'
 		
 		* If a bar position has been defined, it may have been defined by bar name
-		* rather than number, so get the appropriate bar number.
+		* rather than number, so get the appropriate bar number. We don't do this for
+		* shortcut menus because they don't use RELATIVE in the popups.
 		
 				lcBarPosition = ''
-				if not empty(.cBarPosition)
-					lcBarName = alltrim(upper(substr(.cBarPosition, 7)))
-					if val(lcBarName) = 0
-						for lnI = 1 to .nBarNumber - 1
-							loBar = .oParent.Item(lnI)
-							do case
-								case not upper(loBar.Name) == lcBarName
-								case empty(loBar.cSystemBar)
-									lcBarPosition = trim(left(.cBarPosition, 6)) + ;
-										' ' + transform(loBar.nBarNumber)
-									exit
-								otherwise
-									lcBarPosition = trim(left(.cBarPosition, 6)) + ;
-										' ' + transform(evaluate(loBar.cSystemBar))
-									exit
-							endcase
-						next lnI
-					else
-						lcBarPosition = .cBarPosition
-					endif val(lcBarName) = 0
+				do case
+					case .lShortcut
+					case not empty(.cBarPosition)
+						lcBarName = alltrim(upper(substr(.cBarPosition, 7)))
+						if val(lcBarName) = 0
+							for lnI = 1 to .nBarNumber - 1
+								loBar = .oParent.Item(lnI)
+								do case
+									case not upper(loBar.Name) == lcBarName
+									case empty(loBar.cSystemBar)
+										lcBarPosition = trim(left(.cBarPosition, 6)) + ;
+											' ' + transform(loBar.nBarNumber)
+										exit
+									otherwise
+										lcBarPosition = trim(left(.cBarPosition, 6)) + ;
+											' ' + loBar.cSystemBar
+										exit
+								endcase
+							next lnI
+						else
+							lcBarPosition = .cBarPosition
+						endif val(lcBarName) = 0
 		
 		* If the bar position wasn't defined, see if there's another bar in our
 		* position. If so, we'll use the BEFORE clause to put ourselves before that
@@ -343,40 +387,61 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		* menu, then readded. Without the BEFORE clause, it would be added to the end
 		* because we define popups with the RELATIVE clause.
 		
-				else
-					try
-						lnBar = getbar(lcPopupName, .nBarNumber)
-					catch
-						lnBar = .nBarNumber
-					endtry
-					if lnBar <> .nBarNumber
-						lcBarPosition = 'before ' + transform(lnBar)
-					endif lnBar <> .nBarNumber
-				endif not empty(.cBarPosition)
+					otherwise
+						try
+							lnBar = getbar(lcPopupName, .nBarNumber)
+						catch
+							lnBar = .nBarNumber
+						endtry
+						if lnBar <> .nBarNumber
+							lcBarPosition = 'before ' + transform(lnBar)
+						endif lnBar <> .nBarNumber
+				endcase
 		
-		* Set the other clauses of the DEFINE BAR command.
+		* Get the clauses of the DEFINE BAR command.
 		
 				lcClauses = .cMenuClauses + iif(empty(.cMenuClauses), '', ' ') + ;
 					lcBarPosition
-				if not empty(.cKey)
-					lcClauses = lcClauses + ' key ' + .cKey + ", '" + .cKeyText + "'"
-				endif not empty(.cKey)
-				if .lInvert
-					lcClauses = lcClauses + ' invert'
-				endif .lInvert
+		
+		* Set the key clause.
+		
+				lcKey = .GetKeyName('CTRL')
+				if not empty(lcKey)
+					lcKeyText = .cKeyText
+					if empty(lcKeyText)
+						lcKeyText = strtran(upper(lcKey), 'CTRL', 'Ctrl')
+					endif empty(lcKeyText)
+					lcClauses = lcClauses + ' key ' + strtran(lcKey, '"', "'") + ;
+						", '" + lcKeyText + "'"
+				endif not empty(lcKey)
+		
+		* Set the picture.
+		
 				do case
 					case not empty(.cPictureResource)
 						lcClauses = lcClauses + ' pictres ' + .cPictureResource
-					case not empty(.cPicturefile)
-						lcClauses = lcClauses + " picture '" + .cPicturefile + "'"
-					case not empty(.cSystemBar)
+					case not empty(.cPictureFile)
+						lcClauses = lcClauses + " picture '" + .cPictureFile + "'"
+					case llSystemBar
 						lcClauses = lcClauses + ' pictres ' + .cSystemBar
 				endcase
+		
+		* Handle bold.
+		
+				if .lBold
+					lcClauses = lcClauses + [ style "B"]
+				endif .lBold
+		
+		* Set the other clauses.
+		
+				if .lInvert
+					lcClauses = lcClauses + ' invert'
+				endif .lInvert
 		
 		* Define the bar.
 		
 				define bar &lcBarNumber of &lcPopupName prompt lcCaption ;
-					message .cStatusBarText skip for &lcSkipFor &lcClauses
+					message .cStatusBarText &lcSkipFor &lcClauses
 		
 		* Mark the bar if it's supposed to be.
 		
@@ -444,7 +509,7 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 						if empty(loBar.cSystemBar)
 							lcBarNumber = transform(loBar.nBarNumber)
 						else
-							lcBarNumber = transform(evaluate(loBar.cSystemBar))
+							lcBarNumber = loBar.cSystemBar
 						endif empty(loBar.cSystemBar)
 						.cBarPosition = 'after ' + lcBarNumber
 						llFoundBar    = .T.
@@ -462,7 +527,7 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 							if empty(loBar.cSystemBar)
 								lcBarNumber = transform(loBar.nBarNumber)
 							else
-								lcBarNumber = transform(evaluate(loBar.cSystemBar))
+								lcBarNumber = loBar.cSystemBar
 							endif empty(loBar.cSystemBar)
 							.cBarPosition = 'before ' + lcBarNumber
 							exit
@@ -493,9 +558,9 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		* Hide the bar by releasing it.
 		
 				if empty(.cSystemBar)
-					lcBarNumber = transform(.nBarNumber)
+					lcBarNumber = transform(.nBarPosition)
 				else
-					lcBarNumber = transform(evaluate(.cSystemBar))
+					lcBarNumber = .cSystemBar
 				endif empty(.cSystemBar)
 				lcPopupName = .cPopupName
 				release bar &lcBarNumber of &lcPopupName
@@ -549,11 +614,11 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 			lcSetting = iif(tlValue, '.T.', '.F.')
 			.lMarked  = tlValue
 			if empty(.cSystemBar)
-				lcBarNumber = transform(.nBarNumber)
+				lcBarNumber = transform(.nBarPosition)
 			else
-				lcBarNumber = transform(evaluate(.cSystemBar))
+				lcBarNumber = .cSystemBar
 			endif empty(.cSystemBar)
-			lcPopupname = .cPopupName
+			lcPopupName = .cPopupName
 			set mark of bar &lcBarNumber of &lcPopupName to &lcSetting
 		endwith
 		
@@ -577,11 +642,18 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		* If this isn't a separator bar, call AdjustSeparators to avoid consecutive
 		* separator bars.
 		
-				if lower(.Class) <> 'sfseparatorbar' and vartype(.oParent) = 'O'
+				if lower(.Class) <> 'sfseparatorbar' and vartype(.oParent) = 'O' and ;
+					pemstatus(.oParent, 'AdjustSeparators', 5)
 					.oParent.AdjustSeparators()
 				endif lower(.Class) <> 'sfseparatorbar' ...
 			endif tlValue <> .lVisible
 		endwith
+		
+	ENDPROC
+
+	PROCEDURE nbarnumber_assign
+		lparameters tnBarNumber
+		store tnBarNumber to This.nBarNumber, This.nBarPosition
 		
 	ENDPROC
 
@@ -620,6 +692,10 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		This.Hide()
 		for lnI = This.Count to 1 step -1
 			loBar = This.Item(lnI)
+			try
+				removeproperty(This, loBar.Name)
+			catch
+			endtry
 			loBar.Release()
 		next lnI
 		This.oParent = .NULL.
@@ -648,14 +724,15 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 	ENDPROC
 
 	PROCEDURE show		&& Displays the bar
-		* If we're supposed to, call FindBarPosition to see where the bar should go,
-		* then define it.
-		
 		local lnI, ;
 			loBar
 		with This
+		
+		* If we're supposed to, call FindBarPosition to see where the bar should go,
+		* then define it.
+		
 			if .lVisible and not .lDefined
-				if .lSpecified or .lInvert
+				if (.lSpecified or .lInvert) and not .lShortcut
 					.FindBarPosition()
 				endif .lSpecified ...
 				.Define()
@@ -671,6 +748,41 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 					loBar.Show()
 				endif loBar.lInvert
 			next lnI
+		endwith
+		
+	ENDPROC
+
+ENDDEFINE
+
+DEFINE CLASS sfdeveloperpad AS sfpad OF "sfmenu.vcx" 
+ 	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
+
+	ccaption = \<Developer
+	ckey = ALT+D
+	cstatusbartext = Developer functions
+	Name = "sfdeveloperpad"
+	
+	PROCEDURE addbars		&& Add bars to the submenu popup for this bar
+		with This
+			.AddBar('SFSuspendBar', 'SFMenu.vcx', 'DeveloperSuspend')
+			.AddBar('SFBar', 'SFMenu.vcx', 'DeveloperScreenToggle')
+			with .DeveloperScreenToggle
+				.cCaption        = 'To\<ggle Screen'
+				.cOnClickCommand = '_screen.Visible = not _screen.Visible'
+			endwith
+			if version(2) = 2
+				.AddBar('SFBar', 'SFMenu.vcx', 'DeveloperTrace')
+				with .DeveloperTrace
+					.cCaption        = '\<Trace Window'
+					.cOnClickCommand = 'set  step on'
+						&& extra space so searches for SET  STEP don't find it
+				endwith
+				.AddBar('SFBar', 'SFMenu.vcx', 'DeveloperWatch')
+				with .DeveloperWatch
+					.cCaption        = 'Watc\<h Window'
+					.cOnClickCommand = 'activate window Debug'
+				endwith
+			endif version(2) = 2
 		endwith
 		
 	ENDPROC
@@ -951,6 +1063,10 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 			loPad
 		for lnI = This.Count to 1 step -1
 			loPad = This.Item(lnI)
+			try
+				removeproperty(This, loPad.Name)
+			catch
+			endtry
 			loPad.Release()
 		next lnI
 		
@@ -967,8 +1083,8 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 			loPad
 		with This
 		
-		* If we're putting the menu in a top-level form, set cMenuName and define the
-		* menu in the specified form.
+		* If we're putting the menu in a top-level form, set cMenuName, hide any
+		* existing bars, and define the menu in the specified form.
 		
 			if empty(.cFormName) 
 				push menu _MSYSMENU
@@ -979,6 +1095,10 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 				if .cMenuName = '_msysmenu'
 					.cMenuName = sys(2015)
 				endif .cMenuName = '_msysmenu'
+				for lnI = 1 to .Count
+					loPad = .Item(lnI)
+					loPad.Hide()
+				next lnI
 				define menu (.cMenuName) bar in (.cFormName)
 			endif empty(.cFormName) 
 		
@@ -1014,9 +1134,11 @@ DEFINE CLASS sfmenubase AS collection
 		*m: calledfromthisclass		&& Determines if the method that called this method was called from a method of this class or an ancestor
 		*m: cleanup		&& Cleans up member references when the object is released or destroyed
 		*m: clear		&& Clears the collection
+		*m: getkeyname		&& Gets the key name for the KEY clause
 		*m: release		&& Releases the object
 		*m: releasemembers		&& Abstract method to nuke member references
 		*p: cerrormessage		&& The text of an error message
+		*p: lautoassignhotkey		&& .T. to auto-assign a hotkey if once isn't specified
 		*p: lerroroccurred		&& .T. if an error occurred
 		*p: lrelease		&& .T. as the object is being released
 		*p: _memberdata		&& XML Metadata for customizable properties
@@ -1025,6 +1147,7 @@ DEFINE CLASS sfmenubase AS collection
 	PROTECTED lrelease
 	cerrormessage = 		&& The text of an error message
 	Height = 23
+	lautoassignhotkey = .F.		&& .T. to auto-assign a hotkey if once isn't specified
 	lerroroccurred = .F.		&& .T. if an error occurred
 	lrelease = .F.		&& .T. as the object is being released
 	Name = "sfmenubase"
@@ -1039,6 +1162,8 @@ DEFINE CLASS sfmenubase AS collection
 		<memberdata name="lrelease" type="property" display="lRelease"/>
 		<memberdata name="cleanup" type="method" display="Cleanup"/>
 		<memberdata name="calledfromthisclass" type="method" display="CalledFromThisClass"/>
+		<memberdata name="getkeyname" display="GetKeyName"/>
+		<memberdata name="lautoassignhotkey" display="lAutoAssignHotKey"/>
 		</VFPData>		&& XML Metadata for customizable properties
 	
 	PROCEDURE about		&& Provides documentation for the class
@@ -1047,8 +1172,8 @@ DEFINE CLASS sfmenubase AS collection
 		* Based On:						Collection
 		* Purpose:						Base class for all menu objects
 		* Author:						Doug Hennig
-		* Last revision:				10/06/2008
-		* Include file:					SFCTRLS.H
+		* Last revision:				03/05/2019
+		* Include file:					SFCtrls.h
 		*
 		* Changes in "Based On" class properties:
 		*	None
@@ -1074,6 +1199,7 @@ DEFINE CLASS sfmenubase AS collection
 		* Custom public methods added:
 		*	About:						provides documentation for the class
 		*	Clear:						clears the collection
+		*	GetKeyName:					gets the key name to use for the item
 		*	Release:					releases the object
 		*	ReleaseMembers:				abstract method to nuke member references
 		*
@@ -1419,6 +1545,49 @@ DEFINE CLASS sfmenubase AS collection
 		
 	ENDPROC
 
+	PROCEDURE getkeyname		&& Gets the key name for the KEY clause
+		* Get the key name. We'll use the cKey property if it contains a value, the
+		* character following \< in the caption, or the first letter of the caption if
+		* we're supposed to (note: handle the first character being a quote, in which
+		* case we assume it's followed by an expression to be evaluated, so skip over
+		* the expression, per Cathy Pountney).
+		
+		lparameters tcPrefix, ;
+			tlUseFirstLetter
+		local lnPos, ;
+			lcKey, ;
+			lcString, ;
+			lnI, ;
+			lcClauses
+		lnPos = at('\<', .cCaption)
+		lcKey = iif(lnPos > 0 and This.lAutoAssignHotKey, ;
+			tcPrefix + '+' + substr(.cCaption, lnPos + 2, 1), '')
+		do case
+			case not empty(.cKey)
+				lcKey = .cKey
+			case This.lAutoAssignHotKey and empty(lcKey) and tlUseFirstLetter
+				lcString = alltrim(upper(.cCaption))
+				if left(lcString, 1) = '"'
+					lcString = strtran(lcString, ;
+						strextract(lcString, '"', '"', 1, 2 + 4), '')
+				endif left(lcString, 1) = '"'
+				lcKey = ''
+				for lnI = 1 to len(lcString)
+					lcKey = substr(lcString, lnI, 1)
+					if not lcKey $ ' "+[];\' + "'"
+						exit 
+					endif not lcKey $ ' "+[];\' + "'"
+					lcKey = ''
+				next lnI
+				if not empty(lcKey)
+					lcKey = tcPrefix + '+' + lcKey
+				endif not empty(lcKey)
+		endcase
+		lcKey = strtran(lcKey, '"', "'")
+		return lcKey
+		
+	ENDPROC
+
 	PROCEDURE Item
 		lparameters tuIndex
 		local luReturn, ;
@@ -1709,6 +1878,287 @@ DEFINE CLASS sfmenufunction AS custom
 
 ENDDEFINE
 
+DEFINE CLASS sfmenushortcutmenu AS sfmenubase OF "sfmenu.vcx" 
+ 	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
+
+	#INCLUDE "sfctrls.h"
+	*<DefinedPropArrayMethod>
+		*m: addbar		&& Adds a new bar to the shortcut menu
+		*m: addseparatorbar		&& Adds a separator bar to the shortcut menu
+		*m: findbar		&& Returns the bar number for the specified prompt
+		*m: show		&& Display a shortcut menu
+		*p: cinstancename		&& The name of the variable containing the reference for this object
+		*p: cpopupname		&& The name of the popup for this menu
+		*p: ncol		&& The column for the menu (leave 0 to use the default)
+		*p: nrow		&& The row for the menu (leave 0 to use the default)
+	*</DefinedPropArrayMethod>
+
+	cinstancename = 		&& The name of the variable containing the reference for this object
+	cpopupname = 		&& The name of the popup for this menu
+	Name = "sfmenushortcutmenu"
+	ncol = 0		&& The column for the menu (leave 0 to use the default)
+	nrow = 0		&& The row for the menu (leave 0 to use the default)
+	Width = 23
+	_memberdata = <VFPData>
+		<memberdata name="addbar" display="AddBar"/>
+		<memberdata name="addseparatorbar" display="AddSeparatorBar"/>
+		<memberdata name="findbar" display="FindBar"/>
+		<memberdata name="ncol" display="nCol"/>
+		<memberdata name="nrow" display="nRow"/>
+		<memberdata name="cinstancename" display="cInstanceName"/>
+		<memberdata name="cpopupname" display="cPopupName"/>
+		<memberdata name="show" display="Show"/>
+		</VFPData>
+	
+	PROCEDURE addbar		&& Adds a new bar to the shortcut menu
+		lparameters tcPrompt, ;
+			tcOnSelection, ;
+			tuDisabled, ;
+			tcImage, ;
+			tcSystemBar, ;
+			tnElementNumber
+		local lnIndex, ;
+			lnElementNumber, ;
+			loBar, ;
+			lcName
+		with This
+		
+		* If the menu item number was passed, renumber the other bars in the menu.
+		
+			lnIndex = .Count + 1
+			if vartype(tnElementNumber) = 'N'
+				lnElementNumber = max(int(tnElementNumber), 1)
+				if lnElementNumber < .Count
+					lnIndex = lnElementNumber
+					for lnI = 1 to .Count
+						loBar = .Item(lnI)
+						if loBar.nBarNumber >= lnIndex
+							loBar.nBarNumber = loBar.nBarNumber + 1
+						endif loBar.nBarNumber >= lnIndex
+					next lnI
+				endif lnElementNumber < .Count
+			endif vartype(tnElementNumber) = 'N'
+		
+		* A bar object was passed so use it. Save the current bar number and use the
+		* one for this menu.
+		
+			if vartype(tcPrompt) = 'O'
+				loBar  = tcPrompt
+				lcName = loBar.Name
+				loBar.nSavedBarNumber = loBar.nBarNumber
+				loBar.nBarNumber      = lnIndex
+				if vartype(loBar.oParent) <> 'O'
+					loBar.oParent = This
+				endif vartype(loBar.oParent) <> 'O'
+		
+		* Bar settings were passed, so create a bar and set its properties.
+		
+			else
+				lcName = 'Bar' + transform(lnIndex)
+				if '\' + upper(This.ClassLibrary) $ upper(set('CLASSLIB'))
+					loBar = createobject('SFBar', lnIndex, .cPopupName, lcName)
+				else
+					loBar = newobject('SFBar', This.ClassLibrary, '', lnIndex, ;
+						.cPopupName, lcName)
+				endif '\' + upper(This.ClassLibrary) $ upper(set('CLASSLIB'))
+				loBar.cCaption        = tcPrompt
+				loBar.cOnClickCommand = tcOnSelection
+				loBar.cSystemBar      = tcSystemBar
+				loBar.oParent         = This
+				if vartype(tuDisabled) = 'C'
+					loBar.cSkipFor = tuDisabled
+				else
+					loBar.lEnabled = not tuDisabled
+				endif vartype(tuDisabled) = 'C'
+				do case
+					case vartype(tcImage) <> 'C' or empty(tcImage)
+					case left(tcImage, 1) = '_'
+						loBar.cPictureResource = tcImage
+					otherwise
+						loBar.cPictureFile = tcImage
+				endcase
+			endif vartype(tcPrompt) = 'O'
+		
+		* Add the bar to the collection and as a member so it can be referenced
+		* directly.
+		
+			.Add(loBar)
+			.AddProperty(lcName, loBar)
+		endwith
+		return loBar
+		
+	ENDPROC
+
+	PROCEDURE addseparatorbar		&& Adds a separator bar to the shortcut menu
+		lparameters tnElementNumber
+		This.AddBar('\-', , , , , tnElementNumber)
+		
+	ENDPROC
+
+	PROCEDURE findbar		&& Returns the bar number for the specified prompt
+		lparameters tcPrompt
+		local lcPrompt, ;
+			lnBar, ;
+			lnI, ;
+			loBar
+		with This
+			lcPrompt = upper(strtran(strtran(alltrim(tcPrompt), '\<'), '^'))
+			lnBar    = 0
+			for lnI = 1 to .Count
+				loBar = .Item(lnI)
+				if upper(strtran(strtran(loBar.cCaption, '\<'), '^')) == lcPrompt
+					lnBar = lnI
+					exit
+				endif upper(strtran(strtran(loBar.cCaption, '\<'), '^')) == lcPrompt
+			next lnI
+		endwith
+		return lnBar
+		
+	ENDPROC
+
+	PROCEDURE Init
+		* Save the name of the variable or property we're being instantiated into in
+		* cInstanceName. We need this so we can reference the object path from a bar
+		* all the way up to the menu properly.
+		
+		lparameter tcInstanceName
+		This.cPopupName    = sys(2015)
+		This.cInstanceName = tcInstanceName
+		dodefault()
+		
+	ENDPROC
+
+	PROCEDURE releasemembers
+		* Release each bar so our reference in it is nuked.
+		
+		local lcPopupName, ;
+			lnI, ;
+			loBar
+		lcPopupName = This.cPopupName
+		if popup(lcPopupName)
+			release popup &lcPopupName
+		endif popup(lcPopupName)
+		for lnI = This.Count to 1 step -1
+			loBar = This.Item(lnI)
+			if loBar.cPopupName == lcPopupName
+				loBar.Release()
+			endif loBar.cPopupName == lcPopupName
+		next lnI
+		
+	ENDPROC
+
+	PROCEDURE show		&& Display a shortcut menu
+		local loForm, ;
+			lcWindow, ;
+			lcWindowClause, ;
+			lcMenu, ;
+			llPosition, ;
+			lnMRow, ;
+			lnMCol, ;
+			lnSkipCount, ;
+			lnCount, ;
+			loBar, ;
+			llClearMenu
+		with This
+		
+		* Only display the menu if it isn't empty.
+		
+			if .Count > 0
+		
+		* Set the window to appear in.
+		
+				if type('_screen.ActiveForm.Name') = 'C'
+					loForm = _screen.ActiveForm
+				endif type('_screen.ActiveForm.Name') = 'C'
+				if vartype(loForm) = 'O'
+					lcWindow       = loForm.Name
+					lcWindowClause = 'in window ' + lcWindow
+				else
+					lcWindow       = ''
+					lcWindowClause = ''
+				endif vartype(loForm) = 'O'
+		
+		* Create a new popup.
+		
+				lcMenu = .cPopupName
+				deactivate popup (lcMenu)
+				clear typeahead
+				llPosition = .nRow <> 0 or .nCol <> 0
+				if empty(lcWindow)
+					lnMRow = iif(llPosition, .nRow, max(mrow(), 0))
+					lnMCol = iif(llPosition, .nCol, max(mcol(), 0))
+				else
+					lnMRow = iif(llPosition, .nRow, max(mrow(lcWindow), 0))
+					lnMCol = iif(llPosition, .nCol, max(mcol(lcWindow), 0))
+				endif empty(lcWindow)
+				define popup (lcMenu) from lnMRow, lnMCol &lcWindowClause margin ;
+					shortcut
+				on selection popup (lcMenu) deactivate menu (lcMenu)
+		
+		* Renumber the bars: system bars don't use a bar number but a system name
+		* instead, so we only number non-system bars. Also, save the current bar number
+		* and popup name in case the bar is used in both a menu and a shortcut menu.
+		
+				lnSkipCount = 0
+				for lnCount = 1 to .Count
+					loBar = .Item(lnCount)
+					do case
+						case loBar.nSavedBarNumber = 0
+							loBar.nSavedBarNumber = loBar.nBarNumber
+						case loBar.nSavedBarNumber <> loBar.nBarNumber
+							llClearMenu = .T.
+					endcase
+					loBar.cSavedPopupName = loBar.cPopupName
+					loBar.cPopupName      = .cPopupName
+					loBar.lShortcut       = .T.
+					if empty(loBar.cSystemBar)
+						loBar.nBarPosition = loBar.nBarNumber - lnSkipCount
+					else
+						lnSkipCount = lnSkipCount + 1
+					endif empty(loBar.cSystemBar)
+				next lnCount
+		
+		* Add a bar for each menu item to the popup. Ignore a separator at the top or
+		* bottom of the menu.
+		
+				for lnCount = 1 to .Count
+					loBar = .Item(lnCount)
+					if between(lnCount, 2, .Count - 1) or loBar.cCaption <> '\-'
+						loBar.Hide()
+						loBar.Show()
+					endif between(lnCount ...
+				next lnCount
+		
+		* Activate the menu, then once we're done with it, hide all the bars so they'll
+		* be redefined the next time the menu is used and restore the saved bar number
+		* and popup name.
+		
+				activate popup (lcMenu)
+				if not empty(lcMenu)
+					for lnCount = 1 to .Count
+						loBar = .Item(lnCount)
+						loBar.Hide()
+						loBar.nBarNumber = loBar.nSavedBarNumber
+						loBar.cPopupName = loBar.cSavedPopupName
+						loBar.lShortcut  = .F.
+					next lnCount
+					deactivate popup (lcMenu)
+					release popup (lcMenu) extended
+		
+		* If we have any existing bars in our collection, clear it so their bar numbers
+		* don't get messed up on subsequent uses of the shortcut menu.
+		
+					if llClearMenu
+						.Clear()
+					endif llClearMenu
+				endif not empty(lcMenu)
+			endif .Count > 0
+		endwith
+		
+	ENDPROC
+
+ENDDEFINE
+
 DEFINE CLASS sfmrubar AS sfbar OF "sfmenu.vcx" 
  	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
 
@@ -1763,6 +2213,7 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 	cpopupname = 		&& The name of the popup attached to this pad
 	cskipfor = 		&& The logical expression used for the SKIP FOR clause
 	cstatusbartext = 		&& Text displayed in the status bar when this pad is highlighted
+	lautoassignhotkey = .T.
 	ldefined = .F.		&& .T. if the pad and popup for this object have been defined
 	lmru = .F.		&& .T. to add an MRU bar at the bottom of the menu
 	lpaddefined = .F.		&& .T. if the pad has been defined
@@ -1972,6 +2423,7 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 			lcPopupName, ;
 			lcPosition, ;
 			lcSkipFor, ;
+			lcKey, ;
 			lcClauses
 		with This
 			lcObjectPath = .cInstanceName + '.'
@@ -1987,12 +2439,14 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 				lcSkipFor = 'skip for ' + strtran(.cSkipFor, 'This.', lcObjectPath)
 			endif not empty(.cSkipFor)
 		
-		* Set the key clauses of the DEFINE PAD command.
+		* Set the key clause.
 		
-			lcClauses = ''
-			if not empty(.cKey)
-				lcClauses = lcClauses + ' key ' + strtran(.cKey, '"', "'")
-			endif not empty(.cKey)
+			lcKey = This.GetKeyName('ALT', .T.)
+			if empty(lcKey)
+				lcClauses = ''
+			else
+				lcClauses = ' key ' + strtran(lcKey, '"', "'")
+			endif empty(lcKey)
 		
 		* Define the pad.
 		
@@ -2015,11 +2469,17 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 	ENDPROC
 
 	PROCEDURE hide		&& Hide the pad
-		* Hide the pad by releasing it and its popup.
+		* Hide the pad by hiding all bars then releasing it and its popup.
 		
-		local lcPadName, ;
+		local lnI, ;
+			loBar, ;
+			lcPadName, ;
 			lcPopupName
 		with This
+			for lnI = 1 to .Count
+				loBar = .Item(lnI)
+				loBar.Hide()
+			next lnI
 			.lVisible    = .F.
 			.lPadDefined = .F.
 			lcPadName    = .Name
@@ -2090,13 +2550,16 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 		
 		* Now that the popup is closed, show the MRU bar and hide all inverted bars.
 		
-			.MRUBar.Show()
-			for lnI = 1 to .Count
-				loBar = .Item(lnI)
-				if loBar.lInvert
-					loBar.Hide()
-				endif loBar.lInvert
-			next lnI
+			try
+				.MRUBar.Show()
+				for lnI = 1 to .Count
+					loBar = .Item(lnI)
+					if loBar.lInvert
+						loBar.Hide()
+					endif loBar.lInvert
+				next lnI
+			catch
+			endtry
 		endwith
 		
 	ENDPROC
@@ -2141,6 +2604,10 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 		endif popup(lcPopupName)
 		for lnI = This.Count to 1 step -1
 			loBar = This.Item(lnI)
+			try
+				removeproperty(This, loBar.Name)
+			catch
+			endtry
 			loBar.Release()
 		next lnI
 		This.oParent = .NULL.
@@ -3021,6 +3488,33 @@ DEFINE CLASS sfshortcutmenu AS custom
 				endif lnSkipCount < lnMenuCount ...
 			endif vartype(.aMenu[1]) = 'C' ...
 		endwith
+		
+	ENDPROC
+
+ENDDEFINE
+
+DEFINE CLASS sfsuspendbar AS sfbar OF "sfmenu.vcx" 
+ 	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
+
+	ccaption = \<Suspend
+	Name = "sfsuspendbar"
+	
+	PROCEDURE click
+		* Bring up a command window.
+		
+		if version(2) = 0
+			release loForm
+			public loForm
+			loForm = newobject('SFConsoleForm', 'SFConsole.vcx')
+			loForm.Show()
+		else
+			_screen.Visible = .T.
+			activate window Command
+			suspend
+			if wvisible('Command')
+				hide window Command
+			endif wvisible('Command')
+		endif version(2) = 0
 		
 	ENDPROC
 

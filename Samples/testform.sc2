@@ -17,85 +17,260 @@ DEFINE CLASS dataenvironment AS dataenvironment
 
 ENDDEFINE
 
-DEFINE CLASS form1 AS form 
+DEFINE CLASS form1 AS sfform OF "sfctrls.vcx" 
  	*< CLASSDATA: Baseclass="form" Timestamp="" Scale="" Uniqueid="" />
 
 	*-- OBJECTDATA items order determines ZOrder / El orden de los items OBJECTDATA determina el ZOrder 
-	*< OBJECTDATA: ObjPath="Check1" UniqueID="" Timestamp="" />
-	*< OBJECTDATA: ObjPath="Sftoolbarbutton1" UniqueID="" Timestamp="" />
-	*< OBJECTDATA: ObjPath="Check2" UniqueID="" Timestamp="" />
-	*< OBJECTDATA: ObjPath="Sftoolbarbutton2" UniqueID="" Timestamp="" />
+	*< OBJECTDATA: ObjPath="chkOpen" UniqueID="" Timestamp="" />
+	*< OBJECTDATA: ObjPath="cmdOpen" UniqueID="" Timestamp="" />
+	*< OBJECTDATA: ObjPath="chkNew" UniqueID="" Timestamp="" />
+	*< OBJECTDATA: ObjPath="cmdNew" UniqueID="" Timestamp="" />
+	*< OBJECTDATA: ObjPath="txtTest" UniqueID="" Timestamp="" />
+	*< OBJECTDATA: ObjPath="chkInvoice" UniqueID="" Timestamp="" />
 
-	Caption = "Form1"
+	*<DefinedPropArrayMethod>
+		*m: filter		&& Excludes records that do not meet the criteria in the specified expression.
+		*m: findcustomer
+		*m: printinvoice
+		*p: linvoiceselected
+		*p: ofunctions
+		*p: omenubar		&& The menu bar for the form
+	*</DefinedPropArrayMethod>
+
+	Caption = "Menu Demo Form"
 	DoCreate = .T.
+	linvoiceselected = .F.
 	Name = "Form1"
+	ofunctions = .NULL.
+	omenubar = .NULL.		&& The menu bar for the form
 	ShowWindow = 2
+	_memberdata = <VFPData>
+		<memberdata name="omenubar" display="oMenuBar"/>
+		<memberdata name="filter" display="Filter"/>
+		<memberdata name="findcustomer" display="FindCustomer"/>
+		<memberdata name="printinvoice" display="PrintInvoice"/>
+		<memberdata name="linvoiceselected" display="lInvoiceSelected"/>
+		<memberdata name="ofunctions" display="oFunctions"/>
+		</VFPData>
 
-	ADD OBJECT 'Check1' AS checkbox WITH ;
+	ADD OBJECT 'chkInvoice' AS checkbox WITH ;
 		Alignment = 0, ;
 		AutoSize = .T., ;
 		BackStyle = 0, ;
-		Caption = "Enable Open function", ;
-		Height = 17, ;
-		Left = 40, ;
-		Name = "Check1", ;
-		Top = 65, ;
-		Value = .T., ;
-		Width = 136
+		Caption = "Can invoice", ;
+		ControlSource = "Thisform.lInvoiceSelected", ;
+		FontName = "Segoe UI", ;
+		FontSize = 16, ;
+		Height = 32, ;
+		Left = 35, ;
+		Name = "chkInvoice", ;
+		TabIndex = 5, ;
+		Top = 105, ;
+		Width = 128
 		*< END OBJECT: BaseClass="checkbox" />
 
-	ADD OBJECT 'Check2' AS checkbox WITH ;
+	ADD OBJECT 'chkNew' AS checkbox WITH ;
 		Alignment = 0, ;
 		AutoSize = .T., ;
 		BackStyle = 0, ;
 		Caption = "Enable New function", ;
-		Height = 17, ;
-		Left = 40, ;
-		Name = "Check2", ;
-		Top = 85, ;
+		FontName = "Segoe UI", ;
+		FontSize = 16, ;
+		Height = 32, ;
+		Left = 35, ;
+		Name = "chkNew", ;
+		TabIndex = 3, ;
+		Top = 45, ;
 		Value = .T., ;
-		Width = 131
+		Width = 214
 		*< END OBJECT: BaseClass="checkbox" />
 
-	ADD OBJECT 'Sftoolbarbutton1' AS sftoolbarbutton WITH ;
-		Left = 10, ;
-		Name = "Sftoolbarbutton1", ;
-		Picture = ..\source\openxpsmall.bmp, ;
-		Top = 5
-		*< END OBJECT: ClassLib="..\source\sftoolbar.vcx" BaseClass="commandbutton" />
-
-	ADD OBJECT 'Sftoolbarbutton2' AS sftoolbarbutton WITH ;
+	ADD OBJECT 'chkOpen' AS checkbox WITH ;
+		Alignment = 0, ;
+		AutoSize = .T., ;
+		BackStyle = 0, ;
+		Caption = "Enable Open function", ;
+		FontName = "Segoe UI", ;
+		FontSize = 16, ;
+		Height = 32, ;
 		Left = 35, ;
-		Name = "Sftoolbarbutton2", ;
-		Picture = ..\source\newxpsmall.bmp, ;
-		Top = 5
-		*< END OBJECT: ClassLib="..\source\sftoolbar.vcx" BaseClass="commandbutton" />
+		Name = "chkOpen", ;
+		TabIndex = 4, ;
+		Top = 70, ;
+		Value = .T., ;
+		Width = 223
+		*< END OBJECT: BaseClass="checkbox" />
+
+	ADD OBJECT 'cmdNew' AS sftoolbarbutton WITH ;
+		Height = 36, ;
+		Left = 15, ;
+		Name = "cmdNew", ;
+		Picture = newxpsmall.bmp, ;
+		TabIndex = 1, ;
+		Top = 5, ;
+		Width = 36
+		*< END OBJECT: ClassLib="sftoolbar.vcx" BaseClass="commandbutton" />
+
+	ADD OBJECT 'cmdOpen' AS sftoolbarbutton WITH ;
+		Height = 36, ;
+		Left = 55, ;
+		Name = "cmdOpen", ;
+		Picture = openxpsmall.bmp, ;
+		TabIndex = 2, ;
+		Top = 5, ;
+		Width = 36
+		*< END OBJECT: ClassLib="sftoolbar.vcx" BaseClass="commandbutton" />
+
+	ADD OBJECT 'txtTest' AS sftextbox WITH ;
+		FontSize = 16, ;
+		Height = 33, ;
+		Left = 40, ;
+		Name = "txtTest", ;
+		TabIndex = 6, ;
+		Top = 160, ;
+		Width = 135
+		*< END OBJECT: ClassLib="sfctrls.vcx" BaseClass="textbox" />
 	
-	PROCEDURE Check1.Click
+	PROCEDURE filter		&& Excludes records that do not meet the criteria in the specified expression.
+		messagebox('You chose Filter')
+		
+	ENDPROC
+
+	PROCEDURE findcustomer
+		messagebox('You chose Find Customer')
+		
+	ENDPROC
+
+	PROCEDURE Init
+		* Create a collection of implementation objects.
+		
+		set path to ..\source
+		This.oFunctions = createobject('Collection')
+		This.oFunctions.Add(newobject('MyOpenFunction', 'MyMenu.vcx'), ;
+			'FileOpenFunction')
+		This.oFunctions.Add(newobject('MyNewFunction',  'MyMenu.vcx'), ;
+			'FileNewFunction')
+		
+		* Create a menu that lives in the form.
+		
+		This.oMenuBar = newobject('SFMenu', 'SFMenu.vcx', '', ;
+			'_screen.ActiveForm.oMenuBar')
+		This.oMenuBar.cFormName = This.Name
+		
+		* Create the File pad.
+		
+		This.oMenuBar.AddPad('FilePad')
+		with This.oMenuBar.FilePad
+			.cCaption       = '\<File'
+			.cStatusBarText = 'Performs file functions'
+		
+			.AddBar('FileNew')
+			with .FileNew
+				.lAutoAssignHotKey = .T.
+				.cCaption          = '\<New...'
+				.cStatusBarText    = 'Create a file'
+				.cPictureFile      = 'newxpsmall.bmp'
+				.oImplementation   = This.oFunctions.Item('FileNewFunction')
+			endwith
+		
+			.AddBar('FileOpen')
+			with .FileOpen
+				.lAutoAssignHotKey = .T.
+				.cCaption          = '\<Open...'
+				.cStatusBarText    = 'Open a file'
+				.cPictureFile      = 'openxpsmall.bmp'
+				.oImplementation   = This.oFunctions.Item('FileOpenFunction')
+			endwith
+		
+			.AddSeparatorBar()
+		
+			.AddBar('FileExit')
+			with .FileExit
+				.cCaption        = 'E\<xit'
+				.cStatusBarText  = 'Close the form'
+				.cOnClickCommand = '_screen.ActiveForm.Release()'
+			endwith
+		endwith
+		
+		* Create the Edit pad.
+		
+		This.oMenuBar.AddPad('SFEditPad', 'SFMenu.vcx', 'EditPad')
+		
+		* Display the menu (it'll actually appear once the form displays).
+		
+		This.oMenuBar.Show()
+		
+	ENDPROC
+
+	PROCEDURE printinvoice
+		messagebox('You chose Print Invoice')
+		
+	ENDPROC
+
+	PROCEDURE releasemembers
+		* Nuke the menu bar so everything is released properly.
+		
+		This.oMenuBar.Release()
+		
+	ENDPROC
+
+	PROCEDURE shortcutmenu
+		lparameters toMenu, ;
+			tcObject
+		
+		* Add the New and Open buttons from the menu bar to the shortcut menu.
+		
+		toMenu.AddBar(This.oMenuBar.FilePad.FileNew)
+		toMenu.AddBar(This.oMenuBar.FilePad.FileOpen)
+		
+		* Add additional bars.
+		
+		toMenu.AddSeparatorBar()
+		toMenu.AddBar('\<Find Customer', ;
+			tcObject + '.FindCustomer()', ;
+			, ;
+			'Search16.bmp')
+		toMenu.AddBar('F\<ilter...', ;
+			tcObject + '.Filter()', ;
+			, ;
+			'ShowFilters16.bmp')
+		toMenu.AddSeparatorBar()
+		toMenu.AddBar('\<Print Invoice', ;
+			tcObject + '.PrintInvoice()', ;
+			'not ' + tcObject + '.lInvoiceSelected', ;
+			'Printer16.bmp')
+		
+	ENDPROC
+
+	PROCEDURE chkNew.Click
 		local loFunction
-		loFunction = oFunctions.Item('FileOpenFunction')
+		loFunction = Thisform.oFunctions.Item('FileNewFunction')
 		loFunction.lEnabled = This.Value
 		
 	ENDPROC
 
-	PROCEDURE Check2.Click
+	PROCEDURE chkOpen.Click
 		local loFunction
-		loFunction = oFunctions.Item('FileNewFunction')
+		loFunction = Thisform.oFunctions.Item('FileOpenFunction')
 		loFunction.lEnabled = This.Value
 		
 	ENDPROC
 
-	PROCEDURE Sftoolbarbutton1.Init
+	PROCEDURE cmdNew.Refresh
 		* Get an implementation object.
 		
-		This.oImplementation = oFunctions.Item('FileOpenFunction')
+		if vartype(This.oImplementation) <> 'O'
+			This.oImplementation = Thisform.oFunctions.Item('FileNewFunction')
+		endif vartype(This.oImplementation) <> 'O'
 		
 	ENDPROC
 
-	PROCEDURE Sftoolbarbutton2.Init
+	PROCEDURE cmdOpen.Refresh
 		* Get an implementation object.
 		
-		This.oImplementation = oFunctions.Item('FileNewFunction')
+		if vartype(This.oImplementation) <> 'O'
+			This.oImplementation = Thisform.oFunctions.Item('FileOpenFunction')
+		endif vartype(This.oImplementation) <> 'O'
 		
 	ENDPROC
 

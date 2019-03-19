@@ -32,4 +32,4 @@ The goals for this project are:
 
 * Create documentation and samples for all of the components so developers can quickly learn how to use the system.
 
-See the files in the Documentation folder, starting with [Overview of the Classes](Documentation/Overview.md). See [Converting Existing Menus](Documentation/Converting%20Existing%20Menus.md) for details on converting existing MNX-based menus to classes.o
+See the files in the Documentation folder, starting with [Overview of the Classes](Documentation/Overview.md). See [Converting Existing Menus](Documentation/Converting%20Existing%20Menus.md) for details on converting existing MNX-based menus to classes.

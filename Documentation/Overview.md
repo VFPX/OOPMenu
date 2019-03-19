@@ -10,7 +10,7 @@ SFMenu.vcx is a class library that implements the functionality of the menu comp
 
 * [SFMenuFunction](Class%20SFMenuFunction.md): a menu function implementation object, used as the parent class for implementation objects that perform actions when menu items are chosen or toolbar buttons clicked.
 
-* [SFShortcutMenu](Class%20SFShortcutMenu): used to create shortcut menus.
+* [SFMenuShortcutMenu](Class%20SFMenuShortcutMenu): used to create shortcut menus.
 
 Other classes in this VCX are:
 
@@ -25,3 +25,5 @@ Other classes in this VCX are:
 * SFEditPad: a subclass of SFPad that provides the contents of a typical Edit pad.
 
 * SFPadCommand: a subclass of SFPad that executes some functionality when clicked rather than displaying a popup. Like SFBar, the [Click](Click.md) method is called when the pad is selected in the menu and the pad supports an implementation object via its [oImplementation](oImplementation.md) property.
+
+* [SFShortcutMenu](Class%20SFShortcutMenu): an older shortcut menu included for backward compatibility.
