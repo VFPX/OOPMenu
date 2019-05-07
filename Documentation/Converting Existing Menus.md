@@ -9,7 +9,7 @@ loProcess   = newobject('ProcessMNX', 'ConvertMNX.prg')
 loMenu      = loProcess.ProcessMenu('mainmenu.mnx')
 loGenerator = newobject('MenuClassGenerator', 'ConvertMNX.prg')
 loGenerator.cMenuName = 'MainMenu'
-lcCode = loGenerator.GenerateMenu(loMenu)
+loGenerator.GenerateMenu(loMenu)
 strtofile(loGenerator.cCodeOutput, 'menu.prg')
 ```
 

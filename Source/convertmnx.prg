@@ -67,7 +67,7 @@ define class ProcessMNX as Custom
 * (AddPad adds the pad as a member with the specified name) so strip the
 * leading underscore.
 
-		lcName = NAME
+		lcName = evl(NAME, sys(2015))
 		if upper(left(lcName, 4)) = '_MSM'
 			lcName = substr(lcName, 2)
 		endif upper(left(lcName, 4)) = '_MSM'
@@ -141,7 +141,7 @@ define class ProcessMNX as Custom
 			do case
 				case empty(lcName)
 					lcName = toPad.Name + 'Bar' + alltrim(ITEMNUM)
-				case upper(left(lcName, 4)) = '_M'
+				case upper(left(lcName, 2)) = '_M'
 					lcName = substr(lcName, 2)
 			endcase
 

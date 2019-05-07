@@ -1954,7 +1954,7 @@ DEFINE CLASS sfmenushortcutmenu AS sfmenubase OF "sfmenu.vcx"
 		* Bar settings were passed, so create a bar and set its properties.
 		
 			else
-				lcName = 'Bar' + transform(lnIndex)
+				lcName = sys(2015)
 				if '\' + upper(This.ClassLibrary) $ upper(set('CLASSLIB'))
 					loBar = createobject('SFBar', lnIndex, .cPopupName, lcName)
 				else
@@ -2056,6 +2056,7 @@ DEFINE CLASS sfmenushortcutmenu AS sfmenubase OF "sfmenu.vcx"
 			lnMRow, ;
 			lnMCol, ;
 			lnSkipCount, ;
+			laBars[1], ;
 			lnCount, ;
 			loBar, ;
 			llClearMenu
@@ -2100,6 +2101,7 @@ DEFINE CLASS sfmenushortcutmenu AS sfmenubase OF "sfmenu.vcx"
 		* and popup name in case the bar is used in both a menu and a shortcut menu.
 		
 				lnSkipCount = 0
+				dimension laBars[.Count, 2]
 				for lnCount = 1 to .Count
 					loBar = .Item(lnCount)
 					do case
@@ -2116,13 +2118,16 @@ DEFINE CLASS sfmenushortcutmenu AS sfmenubase OF "sfmenu.vcx"
 					else
 						lnSkipCount = lnSkipCount + 1
 					endif empty(loBar.cSystemBar)
+					laBars[lnCount, 1] = loBar
+					laBars[lnCount, 2] = loBar.nBarNumber
 				next lnCount
 		
-		* Add a bar for each menu item to the popup. Ignore a separator at the top or
-		* bottom of the menu.
+		* Put the bars in bar number order and add a bar for each menu item to the
+		* popup. Ignore a separator at the top or bottom of the menu.
 		
+				asort(laBars, 2)
 				for lnCount = 1 to .Count
-					loBar = .Item(lnCount)
+					loBar = laBars[lnCount, 1]
 					if between(lnCount, 2, .Count - 1) or loBar.cCaption <> '\-'
 						loBar.Hide()
 						loBar.Show()
