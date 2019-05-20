@@ -754,41 +754,6 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 
 ENDDEFINE
 
-DEFINE CLASS sfdeveloperpad AS sfpad OF "sfmenu.vcx" 
- 	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
-
-	ccaption = \<Developer
-	ckey = ALT+D
-	cstatusbartext = Developer functions
-	Name = "sfdeveloperpad"
-	
-	PROCEDURE addbars		&& Add bars to the submenu popup for this bar
-		with This
-			.AddBar('SFSuspendBar', 'SFMenu.vcx', 'DeveloperSuspend')
-			.AddBar('SFBar', 'SFMenu.vcx', 'DeveloperScreenToggle')
-			with .DeveloperScreenToggle
-				.cCaption        = 'To\<ggle Screen'
-				.cOnClickCommand = '_screen.Visible = not _screen.Visible'
-			endwith
-			if version(2) = 2
-				.AddBar('SFBar', 'SFMenu.vcx', 'DeveloperTrace')
-				with .DeveloperTrace
-					.cCaption        = '\<Trace Window'
-					.cOnClickCommand = 'set  step on'
-						&& extra space so searches for SET  STEP don't find it
-				endwith
-				.AddBar('SFBar', 'SFMenu.vcx', 'DeveloperWatch')
-				with .DeveloperWatch
-					.cCaption        = 'Watc\<h Window'
-					.cOnClickCommand = 'activate window Debug'
-				endwith
-			endif version(2) = 2
-		endwith
-		
-	ENDPROC
-
-ENDDEFINE
-
 DEFINE CLASS sfeditpad AS sfpad OF "sfmenu.vcx" 
  	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
 
@@ -3493,33 +3458,6 @@ DEFINE CLASS sfshortcutmenu AS custom
 				endif lnSkipCount < lnMenuCount ...
 			endif vartype(.aMenu[1]) = 'C' ...
 		endwith
-		
-	ENDPROC
-
-ENDDEFINE
-
-DEFINE CLASS sfsuspendbar AS sfbar OF "sfmenu.vcx" 
- 	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
-
-	ccaption = \<Suspend
-	Name = "sfsuspendbar"
-	
-	PROCEDURE click
-		* Bring up a command window.
-		
-		if version(2) = 0
-			release loForm
-			public loForm
-			loForm = newobject('SFConsoleForm', 'SFConsole.vcx')
-			loForm.Show()
-		else
-			_screen.Visible = .T.
-			activate window Command
-			suspend
-			if wvisible('Command')
-				hide window Command
-			endif wvisible('Command')
-		endif version(2) = 0
 		
 	ENDPROC
 
