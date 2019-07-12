@@ -162,35 +162,63 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 			tcLibrary, ;
 			tcName, ;
 			tnBarNumber
-		local lnBarNumber, ;
+		local lcName, ;
+			lnBarNumber, ;
+			lcClass, ;
+			lcLibrary, ;
+			lcKey, ;
 			llSpecified, ;
 			loBar
 		with This
 		
+		* If tcClass and tcLibrary weren't specified, use defaults.
+		
+			if pcount() < 3
+				lcName      = tcClass
+				lnBarNumber = tcLibrary
+				lcClass     = 'SFBar'
+				lcLibrary   = 'SFMenu.vcx'
+			else
+				lcClass     = tcClass
+				lcLibrary   = tcLibrary
+				lcName      = tcName
+				lnBarNumber = tnBarNumber
+			endif pcount() < 3
+		
+		* See if the bar already exists and add it if not.
+		
+			lcKey = upper(alltrim(lcName))
+			if .GetKey(lcKey) = 0
+		
 		* Create a bar number if one wasn't passed.
 		
-			if vartype(tnBarNumber) = 'N' and tnBarNumber <> 0
-				lnBarNumber = tnBarNumber
-				llSpecified = .T.
-			else
-				lnBarNumber = .Count + 1
-			endif vartype(tnBarNumber) = 'N' ...
+				if vartype(lnBarNumber) = 'N' and lnBarNumber <> 0
+					llSpecified = .T.
+				else
+					lnBarNumber = .Count + 1
+				endif vartype(lnBarNumber) = 'N' ...
 		
 		* Create the object as a member.
 		
-			if '\' + upper(tcLibrary) $ upper(set('CLASSLIB'))
-				loBar = createobject(tcClass, lnBarNumber, .cPopupNameThis, tcName, ;
-					llSpecified)
-			else
-				loBar = newobject(tcClass, tcLibrary, '', lnBarNumber, ;
-					.cPopupNameThis, tcName, llSpecified)
-			endif '\' + upper(tcLibrary) $ upper(set('CLASSLIB'))
-			loBar.oParent = This
-			.AddProperty(tcName, loBar)
+				if '\' + upper(lcLibrary) $ upper(set('CLASSLIB'))
+					loBar = createobject(lcClass, ;
+						lnBarNumber, .cPopupNameThis, lcName, llSpecified)
+				else
+					loBar = newobject(lcClass, lcLibrary, '', ;
+						lnBarNumber, .cPopupNameThis, lcName, llSpecified)
+				endif '\' + upper(lcLibrary) $ upper(set('CLASSLIB'))
+				loBar.oParent = This
+				.AddProperty(lcName, loBar)
 		
 		* Add the bar to the collection.
 		
-			.Add(loBar, tcName)
+				.Add(loBar, lcName)
+		
+		* Get the existing bar.
+		
+			else
+				loBar = .Item(lcKey)
+			endif .GetKey(lcKey) = 0
 		endwith
 		return loBar
 		
@@ -754,6 +782,41 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 
 ENDDEFINE
 
+DEFINE CLASS sfdeveloperpad AS sfpad OF "sfmenu.vcx" 
+ 	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
+
+	ccaption = \<Developer
+	ckey = ALT+D
+	cstatusbartext = Developer functions
+	Name = "sfdeveloperpad"
+	
+	PROCEDURE addbars		&& Add bars to the submenu popup for this bar
+		with This
+			.AddBar('SFSuspendBar', 'SFMenu.vcx', 'DeveloperSuspend')
+			.AddBar('DeveloperScreenToggle')
+			with .DeveloperScreenToggle
+				.cCaption        = 'To\<ggle Screen'
+				.cOnClickCommand = '_screen.Visible = not _screen.Visible'
+			endwith
+			if version(2) = 2
+				.AddBar('DeveloperTrace')
+				with .DeveloperTrace
+					.cCaption        = '\<Trace Window'
+					.cOnClickCommand = 'set  step on'
+						&& extra space so searches for SET  STEP don't find it
+				endwith
+				.AddBar('DeveloperWatch')
+				with .DeveloperWatch
+					.cCaption        = 'Watc\<h Window'
+					.cOnClickCommand = 'activate window Debug'
+				endwith
+			endif version(2) = 2
+		endwith
+		
+	ENDPROC
+
+ENDDEFINE
+
 DEFINE CLASS sfeditpad AS sfpad OF "sfmenu.vcx" 
  	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
 
@@ -764,7 +827,7 @@ DEFINE CLASS sfeditpad AS sfpad OF "sfmenu.vcx"
 	
 	PROCEDURE addbars		&& Add bars to the submenu popup for this bar
 		with This
-			.AddBar('SFBar', 'SFMenu.vcx', 'EditUndo')
+			.AddBar('EditUndo')
 			with .EditUndo
 				.cCaption       = iif(type('oLocalizer.Name') = 'C', ;
 					oLocalizer.GetLocalizedString('MENU_UNDO'), '\<Undo')
@@ -776,7 +839,7 @@ DEFINE CLASS sfeditpad AS sfpad OF "sfmenu.vcx"
 				.cPictureFile   = 'undoxpsmall.bmp'
 			endwith
 		
-			.AddBar('SFBar', 'SFMenu.vcx', 'EditRedo')
+			.AddBar('EditRedo')
 			with .EditRedo
 				.cCaption       = iif(type('oLocalizer.Name') = 'C', ;
 					oLocalizer.GetLocalizedString('MENU_REDO'), '\<Redo')
@@ -790,7 +853,7 @@ DEFINE CLASS sfeditpad AS sfpad OF "sfmenu.vcx"
 		
 			.AddSeparatorBar()
 		
-			.AddBar('SFBar', 'SFMenu.vcx', 'EditCut')
+			.AddBar('EditCut')
 			with .EditCut
 				.cCaption       = iif(type('oLocalizer.Name') = 'C', ;
 					oLocalizer.GetLocalizedString('MENU_CUT'), 'Cu\<t')
@@ -802,7 +865,7 @@ DEFINE CLASS sfeditpad AS sfpad OF "sfmenu.vcx"
 				.cPictureFile   = 'cutxpsmall.bmp'
 			endwith
 		
-			.AddBar('SFBar', 'SFMenu.vcx', 'EditCopy')
+			.AddBar('EditCopy')
 			with .EditCopy
 				.cCaption       = iif(type('oLocalizer.Name') = 'C', ;
 					oLocalizer.GetLocalizedString('MENU_COPY'), '\<Copy')
@@ -814,7 +877,7 @@ DEFINE CLASS sfeditpad AS sfpad OF "sfmenu.vcx"
 				.cPictureFile   = 'copyxpsmall.bmp'
 			endwith
 		
-			.AddBar('SFBar', 'SFMenu.vcx', 'EditPaste')
+			.AddBar('EditPaste')
 			with .EditPaste
 				.cCaption       = iif(type('oLocalizer.Name') = 'C', ;
 					oLocalizer.GetLocalizedString('MENU_PASTE'), '\<Paste')
@@ -827,7 +890,7 @@ DEFINE CLASS sfeditpad AS sfpad OF "sfmenu.vcx"
 				.cPictureFile   = 'pastexpsmall.bmp'
 			endwith
 		
-			.AddBar('SFBar', 'SFMenu.vcx', 'EditClear')
+			.AddBar('EditClear')
 			with .EditClear
 				.cCaption       = iif(type('oLocalizer.Name') = 'C', ;
 					oLocalizer.GetLocalizedString('MENU_CLEAR'), 'Clear')
@@ -838,7 +901,7 @@ DEFINE CLASS sfeditpad AS sfpad OF "sfmenu.vcx"
 		
 			.AddSeparatorBar()
 		
-			.AddBar('SFBar', 'SFMenu.vcx', 'EditSelectAll')
+			.AddBar('EditSelectAll')
 			with .EditSelectAll
 				.cCaption       = iif(type('oLocalizer.Name') = 'C', ;
 					oLocalizer.GetLocalizedString('MENU_SELECT_ALL'), 'Select \<All')
@@ -2228,10 +2291,11 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 			tcLibrary, ;
 			tcName, ;
 			tnBarNumber
-		local lcClass, ;
-			lcLibrary, ;
-			lcName, ;
+		local lcName, ;
 			lnBarNumber, ;
+			lcClass, ;
+			lcLibrary, ;
+			lcKey, ;
 			llSpecified, ;
 			loBar
 		with This
@@ -2250,29 +2314,40 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 				lnBarNumber = tnBarNumber
 			endif pcount() < 3
 		
+		* See if the bar already exists and add it if not.
+		
+			lcKey = upper(alltrim(lcName))
+			if .GetKey(lcKey) = 0
+		
 		* Create a bar number if one wasn't passed.
 		
-			if vartype(lnBarNumber) = 'N' and lnBarNumber <> 0
-				llSpecified = .T.
-			else
-				lnBarNumber = .Count + 1
-			endif vartype(tnBarNumber) = 'N' ...
+				if vartype(lnBarNumber) = 'N' and lnBarNumber <> 0
+					llSpecified = .T.
+				else
+					lnBarNumber = .Count + 1
+				endif vartype(tnBarNumber) = 'N' ...
 		
 		* Create the object as a member.
 		
-			if '\' + upper(lcLibrary) $ upper(set('CLASSLIB'))
-				loBar = createobject(lcClass, lnBarNumber, .cPopupName, lcName, ;
-					llSpecified)
-			else
-				loBar = newobject(lcClass, lcLibrary, '', lnBarNumber, .cPopupName, ;
-					lcName, llSpecified)
-			endif '\' + upper(lcLibrary) $ upper(set('CLASSLIB'))
-			loBar.oParent = This
-			.AddProperty(lcName, loBar)
+				if '\' + upper(lcLibrary) $ upper(set('CLASSLIB'))
+					loBar = createobject(lcClass, ;
+						lnBarNumber, .cPopupName, lcName, llSpecified)
+				else
+					loBar = newobject(lcClass, lcLibrary, '', ;
+						lnBarNumber, .cPopupName, lcName, llSpecified)
+				endif '\' + upper(lcLibrary) $ upper(set('CLASSLIB'))
+				loBar.oParent = This
+				.AddProperty(lcName, loBar)
 		
 		* Add the bar to the collection.
 		
-			.Add(loBar, lcName)
+				.Add(loBar, lcName)
+		
+		* Get the existing bar.
+		
+			else
+				loBar = .Item(lcKey)
+			endif .GetKey(lcKey) = 0
 		endwith
 		return loBar
 		
@@ -3458,6 +3533,49 @@ DEFINE CLASS sfshortcutmenu AS custom
 				endif lnSkipCount < lnMenuCount ...
 			endif vartype(.aMenu[1]) = 'C' ...
 		endwith
+		
+	ENDPROC
+
+ENDDEFINE
+
+DEFINE CLASS sfsuspendbar AS sfbar OF "sfmenu.vcx" 
+ 	*< CLASSDATA: Baseclass="collection" Timestamp="" Scale="Pixels" Uniqueid="" />
+
+	*<DefinedPropArrayMethod>
+		*p: cconsoleclass		&& The class to use for a VFP command window in a runtime environment
+		*p: cconsolelibrary		&& The library containing the class specified in cConsoleClass
+	*</DefinedPropArrayMethod>
+
+	ccaption = \<Suspend
+	cconsoleclass = SFConsoleForm		&& The class to use for a VFP command window in a runtime environment
+	cconsolelibrary = SFConsole.vcx		&& The library containing the class specified in cConsoleClass
+	Name = "sfsuspendbar"
+	_memberdata = <VFPData>
+		<memberdata name="cconsolelibrary" display="cConsoleLibrary"/>
+		<memberdata name="cconsoleclass" display="cConsoleClass"/>
+		</VFPData>
+	
+	PROCEDURE click
+		* Bring up a command window.
+		
+		if version(2) = 0
+			release loForm
+			public loForm
+			loForm = newobject(This.cConsoleClass, This.cConsoleLibrary)
+			loForm.Show()
+		else
+			_screen.Visible = .T.
+			activate window Command
+			suspend
+			if wvisible('Command')
+				hide window Command
+			endif wvisible('Command')
+		endif version(2) = 0
+		
+	ENDPROC
+
+	PROCEDURE evaluatevisible
+		return version(2) = 2 or file(This.cConsoleLibrary)
 		
 	ENDPROC
 

@@ -1,0 +1,8 @@
+*.FXP
+*.ERR
+*.BAK
+*.log
+*.zip
+*.doc
+*.chm
+HTMLHelp/*

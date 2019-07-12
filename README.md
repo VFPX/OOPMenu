@@ -1,6 +1,6 @@
 # OOPMenu
 
-**Provides Object-Oriented menus for use in Visual Foxpro 9.0 development**
+**Provides object-oriented menus for use in Visual FoxPro 9.0 development**
 
 Project Manager: [Doug Hennig](mailto:dhennig@stonefield.com)
 
