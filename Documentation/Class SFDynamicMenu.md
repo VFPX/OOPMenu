@@ -18,7 +18,7 @@ Taking inspiration from Matt Slay's [Dynamic Forms](https://github.com/mattslay/
                       | Name = FilePrintInvoice
         &Customers    cOnClickCommand = messagebox('You chose Customers')
                       | Name = FilePrintCustomerList
-    -
+    -----
     E&xit             cOnClickCommand = oMenu.Release()
                       | Name = FileExit
 &Edit                 Class = SFEditPad | Library = SFMenu.vcx
@@ -32,7 +32,7 @@ There are a few things to note about this content:
 
 * Lines that have more than indent level represent bars in a submenu, in another bar.
 
-* The first thing on a line (after any tabs) is the caption of the item. You can use "&" as a replacement for "\<" to indicate the hotkey in a caption. Specify "-" (more than one is allowed) for the caption to represent a separator bar.
+* The first thing on a line (after any tabs) is the caption of the item. You can use "&" as a replacement for "\\<" to indicate the hotkey in a caption. Specify "-" (more than one is allowed) for the caption to represent a separator bar.
 
 * One or more tabs separate the caption from the properties for the item. Properties are specified as "property name = propertyvalue;" for example, "cPictureFile = MyImage.bmp." Properties are separated with "|," although that's a property of SFDynamicMenu (cDelimiter) you can change if you need to use "|" for some other purpose, such as in the caption.
 
