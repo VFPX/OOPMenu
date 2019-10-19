@@ -184,6 +184,8 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 				lcName      = tcName
 				lnBarNumber = tnBarNumber
 			endif pcount() < 3
+			lcClass   = evl(lcClass,   'SFBar')
+			lcLibrary = evl(lcLibrary, 'SFMenu.vcx')
 		
 		* See if the bar already exists and add it if not.
 		
@@ -1006,6 +1008,8 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 				lcLibrary = tcLibrary
 				lcName    = tcName
 			endif pcount() < 3
+			lcClass   = evl(lcClass,   'SFPad')
+			lcLibrary = evl(lcLibrary, 'SFMenu.vcx')
 		
 		* Add a pad of the desired class and name to the menu.
 		
@@ -1053,6 +1057,23 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 		
 	ENDPROC
 
+	PROCEDURE clear
+		* Release each pad so our reference in it is nuked.
+		
+		local lnI, ;
+			loPad
+		for lnI = This.Count to 1 step -1
+			loPad = This.Item(lnI)
+			try
+				removeproperty(This, loPad.Name)
+			catch
+			endtry
+			loPad.Release()
+		next lnI
+		dodefault()
+		
+	ENDPROC
+
 	PROCEDURE definemenu		&& Defines the desired pads in the menu
 		* Abstract method
 		
@@ -1085,18 +1106,9 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 	ENDPROC
 
 	PROCEDURE releasemembers
-		* Release each pad so our reference in it is nuked.
+		* Nuke the pads.
 		
-		local lnI, ;
-			loPad
-		for lnI = This.Count to 1 step -1
-			loPad = This.Item(lnI)
-			try
-				removeproperty(This, loPad.Name)
-			catch
-			endtry
-			loPad.Release()
-		next lnI
+		This.Clear()
 		
 		* Clean up the menu. 
 		
@@ -1107,6 +1119,7 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 	ENDPROC
 
 	PROCEDURE show		&& Displays the menu.
+		lparameters tlNoPushMenu
 		local lnI, ;
 			loPad
 		with This
@@ -1114,8 +1127,10 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 		* If we're putting the menu in a top-level form, set cMenuName, hide any
 		* existing bars, and define the menu in the specified form.
 		
-			if empty(.cFormName) 
-				push menu _MSYSMENU
+			if empty(.cFormName)
+				if not tlNoPushMenu
+					push menu _MSYSMENU
+				endif not tlNoPushMenu
 				if not .lAddToSystemMenu
 			    	set sysmenu to
 				endif not .lAddToSystemMenu
@@ -1575,43 +1590,51 @@ DEFINE CLASS sfmenubase AS collection
 
 	PROCEDURE getkeyname		&& Gets the key name for the KEY clause
 		* Get the key name. We'll use the cKey property if it contains a value, the
-		* character following \< in the caption, or the first letter of the caption if
-		* we're supposed to (note: handle the first character being a quote, in which
-		* case we assume it's followed by an expression to be evaluated, so skip over
-		* the expression, per Cathy Pountney).
+		* character following \< or & in the caption, or the first letter of the
+		* caption if we're supposed to (note: handle the first character being a quote,
+		* in which case we assume it's followed by an expression to be evaluated, so
+		* skip over the expression, per Cathy Pountney).
 		
 		lparameters tcPrefix, ;
 			tlUseFirstLetter
 		local lnPos, ;
+			lnLen, ;
 			lcKey, ;
 			lcString, ;
 			lnI, ;
 			lcClauses
-		lnPos = at('\<', .cCaption)
-		lcKey = iif(lnPos > 0 and This.lAutoAssignHotKey, ;
-			tcPrefix + '+' + substr(.cCaption, lnPos + 2, 1), '')
-		do case
-			case not empty(.cKey)
-				lcKey = .cKey
-			case This.lAutoAssignHotKey and empty(lcKey) and tlUseFirstLetter
-				lcString = alltrim(upper(.cCaption))
-				if left(lcString, 1) = '"'
-					lcString = strtran(lcString, ;
-						strextract(lcString, '"', '"', 1, 2 + 4), '')
-				endif left(lcString, 1) = '"'
-				lcKey = ''
-				for lnI = 1 to len(lcString)
-					lcKey = substr(lcString, lnI, 1)
-					if not lcKey $ ' "+[];\' + "'"
-						exit 
-					endif not lcKey $ ' "+[];\' + "'"
+		with This
+			lnPos = at('\<', .cCaption)
+			lnLen = 2
+			if lnPos = 0
+				lnPos = at('&', .cCaption)
+				lnLen = 1
+			endif lnPos = 0
+			lcKey = iif(lnPos > 0 and .lAutoAssignHotKey, ;
+				tcPrefix + '+' + substr(.cCaption, lnPos + lnLen, 1), '')
+			do case
+				case not empty(.cKey)
+					lcKey = .cKey
+				case .lAutoAssignHotKey and empty(lcKey) and tlUseFirstLetter
+					lcString = alltrim(upper(.cCaption))
+					if left(lcString, 1) = '"'
+						lcString = strtran(lcString, ;
+							strextract(lcString, '"', '"', 1, 2 + 4), '')
+					endif left(lcString, 1) = '"'
 					lcKey = ''
-				next lnI
-				if not empty(lcKey)
-					lcKey = tcPrefix + '+' + lcKey
-				endif not empty(lcKey)
-		endcase
-		lcKey = strtran(lcKey, '"', "'")
+					for lnI = 1 to len(lcString)
+						lcKey = substr(lcString, lnI, 1)
+						if not lcKey $ ' "+[];\' + "'"
+							exit 
+						endif not lcKey $ ' "+[];\' + "'"
+						lcKey = ''
+					next lnI
+					if not empty(lcKey)
+						lcKey = tcPrefix + '+' + lcKey
+					endif not empty(lcKey)
+			endcase
+			lcKey = strtran(lcKey, '"', "'")
+		endwith
 		return lcKey
 		
 	ENDPROC
@@ -2313,6 +2336,8 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 				lcName      = tcName
 				lnBarNumber = tnBarNumber
 			endif pcount() < 3
+			lcClass   = evl(lcClass,   'SFBar')
+			lcLibrary = evl(lcLibrary, 'SFMenu.vcx')
 		
 		* See if the bar already exists and add it if not.
 		
@@ -2436,7 +2461,7 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 		* Create a default status bar text if we don't have one.
 		
 			if empty(.cStatusBarText)
-				.cStatusBarText = strtran(strtran(.cCaption, '\<'), '\')
+				.cStatusBarText = strtran(strtran(strtran(.cCaption, '\<'), '\'), '&')
 			endif empty(.cStatusBarText)
 		
 		* Define the pad and popup if necessary, then add bars to the popup.
@@ -2469,7 +2494,8 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 			lcPosition, ;
 			lcSkipFor, ;
 			lcKey, ;
-			lcClauses
+			lcClauses, ;
+			lcCaption
 		with This
 			lcObjectPath = .cInstanceName + '.'
 			lcPadName    = .Name
@@ -2493,10 +2519,14 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 				lcClauses = ' key ' + strtran(lcKey, '"', "'")
 			endif empty(lcKey)
 		
+		* Replace & with \< in the caption.
+		
+			lcCaption = strtran(.cCaption, '&', '\<')
+		
 		* Define the pad.
 		
 		*** TODO: handle cContainerPosition and cObjectPosition for NEGOTIATE clause
-			define pad &lcPadName of (.oParent.cMenuName) prompt .cCaption ;
+			define pad &lcPadName of (.oParent.cMenuName) prompt lcCaption ;
 				color scheme 3 &lcPosition &lcSkipFor message .cStatusBarText ;
 				negotiate left, right &lcClauses
 			.OnPad(lcPadName, lcPopupName, lcObjectPath)

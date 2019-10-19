@@ -27,3 +27,5 @@ Other classes in this VCX are:
 * SFPadCommand: a subclass of SFPad that executes some functionality when clicked rather than displaying a popup. Like SFBar, the [Click](Click.md) method is called when the pad is selected in the menu and the pad supports an implementation object via its [oImplementation](oImplementation.md) property.
 
 * [SFShortcutMenu](Class%20SFShortcutMenu): an older shortcut menu included for backward compatibility.
+
+Another class library, [SFDynamicMenu.vcx](Class%20SFDynamicMenu), contains a single class: SFDynamicMenu, which is used for reading a menu layout from text.

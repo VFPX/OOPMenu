@@ -40,16 +40,17 @@ FOR EACH loProject IN _VFP.Projects FOXOBJECT
 ENDFOR
 
 STRTOFILE( '', '__newproject.f2b' )
-BUILD PROJECT sample.pjx FROM '__newproject.f2b'
+BUILD PROJECT sample.PJX FROM '__newproject.f2b'
 FOR EACH loProject IN _VFP.Projects FOXOBJECT
 	loProject.Close()
 ENDFOR
 
-MODIFY PROJECT 'sample.pjx' NOWAIT NOSHOW NOPROJECTHOOK
+MODIFY PROJECT 'sample.PJX' NOWAIT NOSHOW NOPROJECTHOOK
 
-loProject = _VFP.Projects('sample.pjx')
+loProject = _VFP.Projects('sample.PJX')
 
 WITH loProject.FILES
+	.ADD('..\source\sfdynamicmenu.vcx')		&& *< FileMetadata: Type="V" Cpid="1252" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
 	.ADD('..\source\sfmenu.vcx')		&& *< FileMetadata: Type="V" Cpid="1252" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
 	.ADD('changetofrench.prg')		&& *< FileMetadata: Type="P" Cpid="1252" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
 	.ADD('demomenu1.prg')		&& *< FileMetadata: Type="P" Cpid="1252" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
@@ -57,6 +58,7 @@ WITH loProject.FILES
 	.ADD('demomenu3.prg')		&& *< FileMetadata: Type="P" Cpid="1252" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
 	.ADD('demomenu4.prg')		&& *< FileMetadata: Type="P" Cpid="1252" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
 	.ADD('french.dbf')		&& *< FileMetadata: Type="D" Cpid="0" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
+	.ADD('menu.txt')		&& *< FileMetadata: Type="T" Cpid="1252" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
 	.ADD('mymenu.vcx')		&& *< FileMetadata: Type="V" Cpid="1252" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
 	.ADD('sfctrls.vcx')		&& *< FileMetadata: Type="V" Cpid="1252" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
 	.ADD('sftoolbar.vcx')		&& *< FileMetadata: Type="V" Cpid="1252" Timestamp="0" ID="0" ObjRev="0" User="" DevInfo="" />
@@ -78,7 +80,6 @@ ENDWITH
 
 WITH loProject
 	*<ProjectProperties>
-	.SetMain(lcCurdir + '..\source\sfmenu.vcx')
 	.Debug = .T.
 	.Encrypted = .F.
 	*<.CmntStyle = 1 />
@@ -91,7 +92,7 @@ WITH loProject
 ENDWITH
 
 
-_VFP.Projects('sample.pjx').Close()
+_VFP.Projects('sample.PJX').Close()
 *ERASE '__newproject.f2b'
 CD (lcCurdir)
 RETURN
