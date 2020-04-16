@@ -485,9 +485,14 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 					on selection bar &lcBarNumber of &lcPopupName &lcBarPath.Click()
 				endif not llSystemBar
 		
-		* Now add bars to the submenu. If we have any, create the popup for it.
+		* If we haven't already, add bars to the submenu.
 		
-				.AddBars()
+				if .Count = 0
+					.AddBars()
+				endif .Count = 0
+		
+		* If we have any bars, create a popup for the submenu.
+		
 				if .Count > 0
 					lcPopupNameThis = .cPopupNameThis
 					define popup (.cPopupNameThis) margin relative shadow ;
@@ -720,14 +725,14 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		local lnI, ;
 			loBar
 		This.Hide()
-		for lnI = This.Count to 1 step -1
-			loBar = This.Item(lnI)
-			try
-				removeproperty(This, loBar.Name)
-			catch
-			endtry
-			loBar.Release()
-		next lnI
+		*for lnI = This.Count to 1 step -1
+		*	loBar = This.Item(lnI)
+		*	try
+		*		removeproperty(This, loBar.Name)
+		*	catch
+		*	endtry
+		*	loBar.Release()
+		*next lnI
 		This.oParent = .NULL.
 		
 		* Unbind from and nuke our implementation object.
@@ -966,12 +971,14 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 		*p: cinstancename		&& The name of the variable containing the reference for this object
 		*p: cmenuname		&& The name of the menu
 		*p: laddtosystemmenu		&& .T. to add to the VFP system menu or .F. to be a standalone menu
+		*p: ldefined		&& .T. if the menu has been defined
 	*</DefinedPropArrayMethod>
 
 	cformname = 		&& The name of a top-level form for a menu to be placed into
 	cinstancename = 		&& The name of the variable containing the reference for this object
 	cmenuname = _msysmenu		&& The name of the menu
 	laddtosystemmenu = .F.		&& .T. to add to the VFP system menu or .F. to be a standalone menu
+	ldefined = .F.		&& .T. if the menu has been defined
 	Name = "sfmenu"
 	_memberdata = <VFPData>
 		<memberdata name="addpad" type="method" display="AddPad"/>
@@ -983,6 +990,7 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 		<memberdata name="cformname" type="property" display="cFormName"/>
 		<memberdata name="cmenuname" type="property" display="cMenuName"/>
 		<memberdata name="laddtosystemmenu" display="lAddToSystemMenu"/>
+		<memberdata name="ldefined" display="lDefined"/>
 		</VFPData>
 	
 	PROCEDURE addpad		&& Adds a pad to the menu
@@ -1123,29 +1131,38 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 		local lnI, ;
 			loPad
 		with This
+			do case
+		
+		* The menu's already been defined so don't do anything.
+		
+				case .lDefined
+		
+		* If we're using the system menu bar, push the existing menu if we're supposed
+		* to.
+		
+				case empty(.cFormName)
+					if not tlNoPushMenu
+						push menu _MSYSMENU
+					endif not tlNoPushMenu
+					if not .lAddToSystemMenu
+				    	set sysmenu to
+					endif not .lAddToSystemMenu
 		
 		* If we're putting the menu in a top-level form, set cMenuName, hide any
 		* existing bars, and define the menu in the specified form.
 		
-			if empty(.cFormName)
-				if not tlNoPushMenu
-					push menu _MSYSMENU
-				endif not tlNoPushMenu
-				if not .lAddToSystemMenu
-			    	set sysmenu to
-				endif not .lAddToSystemMenu
-			else 
-				if .cMenuName = '_msysmenu'
-					.cMenuName = sys(2015)
-				endif .cMenuName = '_msysmenu'
-				for lnI = 1 to .Count
-					loPad = .Item(lnI)
-					loPad.Hide()
-				next lnI
-				define menu (.cMenuName) bar in (.cFormName)
-			endif empty(.cFormName) 
+				otherwise
+					if .cMenuName = '_msysmenu'
+						.cMenuName = sys(2015)
+					endif .cMenuName = '_msysmenu'
+					for lnI = 1 to .Count
+						loPad = .Item(lnI)
+						loPad.Hide()
+					next lnI
+					define menu (.cMenuName) bar in (.cFormName)
+			endcase
 		
-		* Define the menu if it hasn't already been.
+		* Define the menu pads if necessary.
 		
 			if .Count = 0
 				.DefineMenu()
@@ -1162,6 +1179,10 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 		
 			set sysmenu automatic
 			activate menu (.cMenuName) nowait
+		
+		* Flag that we've been defined.
+		
+			.lDefined = .T.
 		endwith
 		
 	ENDPROC
@@ -2464,13 +2485,18 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 				.cStatusBarText = strtran(strtran(strtran(.cCaption, '\<'), '\'), '&')
 			endif empty(.cStatusBarText)
 		
-		* Define the pad and popup if necessary, then add bars to the popup.
+		* Define the pad and popup if necessary.
 		
 			if not .lPadDefined
 				.DefinePopup()
 				.DefinePad()
 			endif not .lPadDefined
-			.AddBars()
+		
+		* If we haven't already, add bars to the popup.
+		
+			if .Count = 0
+				.AddBars()
+			endif .Count = 0
 		
 		* If this is an MRU menu, add an MRU bar at the end.
 		
