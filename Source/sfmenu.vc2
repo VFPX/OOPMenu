@@ -725,14 +725,14 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 		local lnI, ;
 			loBar
 		This.Hide()
-		*for lnI = This.Count to 1 step -1
-		*	loBar = This.Item(lnI)
-		*	try
-		*		removeproperty(This, loBar.Name)
-		*	catch
-		*	endtry
-		*	loBar.Release()
-		*next lnI
+		for lnI = This.Count to 1 step -1
+			loBar = This.Item(lnI)
+			try
+				removeproperty(This, loBar.Name)
+			catch
+			endtry
+			loBar.Release()
+		next lnI
 		This.oParent = .NULL.
 		
 		* Unbind from and nuke our implementation object.
@@ -806,16 +806,24 @@ DEFINE CLASS sfdeveloperpad AS sfpad OF "sfmenu.vcx"
 				.cOnClickCommand = '_screen.Visible = not _screen.Visible'
 			endwith
 			if version(2) = 2
-				.AddBar('DeveloperTrace')
-				with .DeveloperTrace
-					.cCaption        = '\<Trace Window'
+				.AddBar('DeveloperDebug')
+				with .DeveloperDebug
+					.cCaption        = '\<Debugger'
 					.cOnClickCommand = 'set  step on'
 						&& extra space so searches for SET  STEP don't find it
 				endwith
-				.AddBar('DeveloperWatch')
-				with .DeveloperWatch
-					.cCaption        = 'Watc\<h Window'
-					.cOnClickCommand = 'activate window Debug'
+				.AddBar('DeveloperResume')
+				with .DeveloperResume
+					.cCaption   = '\<Resume'
+					.cSystemBar = '_mpr_resum'
+					.cKey       = 'CTRL+M'
+				endwith
+				.AddBar('DeveloperCommandWindow')
+				with .DeveloperCommandWindow
+					.cCaption        = '\<Command Window'
+		*			.cOnClickCommand = 'activate window Command'
+					.cSystemBar = '_mwi_cmd'
+					.cKey            = 'CTRL+F2'
 				endwith
 			endif version(2) = 2
 		endwith
@@ -1078,6 +1086,7 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 			endtry
 			loPad.Release()
 		next lnI
+		This.lDefined = .F.
 		dodefault()
 		
 	ENDPROC
@@ -2435,7 +2444,7 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 		lnBefore        = 0
 		lnAfter         = 0
 		loSeparatorLast = .NULL.
-		for each loItem in This
+		for each loItem in This foxobject
 			llSeparator = lower(loItem.Class) = 'sfseparatorbar'
 			do case
 		
