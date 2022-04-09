@@ -33,3 +33,13 @@ The goals for this project are:
 * Create documentation and samples for all of the components so developers can quickly learn how to use the system.
 
 See the files in the Documentation folder, starting with [Overview of the Classes](Documentation/Overview.md). See [Converting Existing Menus](Documentation/Converting%20Existing%20Menus.md) for details on converting existing MNX-based menus to classes.
+
+## Helping with this project
+
+See [How to contribute to OOP Menu](.github/CONTRIBUTING.md) for details on how to help with this project.
+
+## Releases
+
+### 2019-06-27
+
+* Initial release.
