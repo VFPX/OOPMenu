@@ -37,7 +37,8 @@ To create a menu in a top-level form, set the cFormName property.
 |-----------|------------------------------------------|
 | [cFormName](cFormName.md) | Specifies the name of a top-level form in which to put the menu. |
 | [cMenuName](cMenuName.md) | Specifies the name of the menu.          |
-
+| cCleanup | Cleanup code to execute after the menu is defined when Show is called. |
+| cSetup | Setup code to execute before the menu is defined when Show is called. |
 
 ## Example
 

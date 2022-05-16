@@ -648,13 +648,15 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 			assert vartype(tlValue) = 'L'
 			lcSetting = iif(tlValue, '.T.', '.F.')
 			.lMarked  = tlValue
-			if empty(.cSystemBar)
-				lcBarNumber = transform(.nBarPosition)
-			else
-				lcBarNumber = .cSystemBar
-			endif empty(.cSystemBar)
-			lcPopupName = .cPopupName
-			set mark of bar &lcBarNumber of &lcPopupName to &lcSetting
+			if .lDefined
+				if empty(.cSystemBar)
+					lcBarNumber = transform(.nBarPosition)
+				else
+					lcBarNumber = .cSystemBar
+				endif empty(.cSystemBar)
+				lcPopupName = .cPopupName
+				set mark of bar &lcBarNumber of &lcPopupName to &lcSetting
+			endif .lDefined
 		endwith
 		
 	ENDPROC
@@ -820,10 +822,9 @@ DEFINE CLASS sfdeveloperpad AS sfpad OF "sfmenu.vcx"
 				endwith
 				.AddBar('DeveloperCommandWindow')
 				with .DeveloperCommandWindow
-					.cCaption        = '\<Command Window'
-		*			.cOnClickCommand = 'activate window Command'
+					.cCaption   = '\<Command Window'
 					.cSystemBar = '_mwi_cmd'
-					.cKey            = 'CTRL+F2'
+					.cKey       = 'CTRL+F2'
 				endwith
 			endif version(2) = 2
 		endwith
@@ -975,16 +976,20 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 		*m: definemenu		&& Defines the desired pads in the menu
 		*m: refresh		&& Refreshes the display of the menu.
 		*m: show		&& Displays the menu.
+		*p: ccleanup		&& Cleanup code
 		*p: cformname		&& The name of a top-level form for a menu to be placed into
 		*p: cinstancename		&& The name of the variable containing the reference for this object
 		*p: cmenuname		&& The name of the menu
+		*p: csetup		&& Setup code
 		*p: laddtosystemmenu		&& .T. to add to the VFP system menu or .F. to be a standalone menu
 		*p: ldefined		&& .T. if the menu has been defined
 	*</DefinedPropArrayMethod>
 
+	ccleanup = 		&& Cleanup code
 	cformname = 		&& The name of a top-level form for a menu to be placed into
 	cinstancename = 		&& The name of the variable containing the reference for this object
 	cmenuname = _msysmenu		&& The name of the menu
+	csetup = 		&& Setup code
 	laddtosystemmenu = .F.		&& .T. to add to the VFP system menu or .F. to be a standalone menu
 	ldefined = .F.		&& .T. if the menu has been defined
 	Name = "sfmenu"
@@ -999,6 +1004,8 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 		<memberdata name="cmenuname" type="property" display="cMenuName"/>
 		<memberdata name="laddtosystemmenu" display="lAddToSystemMenu"/>
 		<memberdata name="ldefined" display="lDefined"/>
+		<memberdata name="csetup" display="cSetup"/>
+		<memberdata name="ccleanup" display="cCleanup"/>
 		</VFPData>
 	
 	PROCEDURE addpad		&& Adds a pad to the menu
@@ -1177,12 +1184,24 @@ DEFINE CLASS sfmenu AS sfmenubase OF "sfmenu.vcx" 		&& A menu
 				.DefineMenu()
 			endif .Count = 0
 		
+		* Execute any setup code.
+		
+			if not empty(.cSetup)
+				execscript(.cSetup)
+			endif not empty(.cSetup)
+		
 		* Show all the pads.
 		
 			for lnI = 1 to .Count
 				loPad = .Item(lnI)
 				loPad.Show()
 			next lnI
+		
+		* Execute any cleanup code.
+		
+			if not empty(.cCleanup)
+				execscript(.cCleanup)
+			endif not empty(.cCleanup)
 		
 		* Display the menu.
 		
@@ -1997,7 +2016,8 @@ DEFINE CLASS sfmenushortcutmenu AS sfmenubase OF "sfmenu.vcx"
 			tuDisabled, ;
 			tcImage, ;
 			tcSystemBar, ;
-			tnElementNumber
+			tnElementNumber, ;
+			tlChecked
 		local lnIndex, ;
 			lnElementNumber, ;
 			loBar, ;
@@ -2046,6 +2066,7 @@ DEFINE CLASS sfmenushortcutmenu AS sfmenubase OF "sfmenu.vcx"
 				loBar.cOnClickCommand = tcOnSelection
 				loBar.cSystemBar      = tcSystemBar
 				loBar.oParent         = This
+				loBar.lMarked         = tlChecked
 				if vartype(tuDisabled) = 'C'
 					loBar.cSkipFor = tuDisabled
 				else

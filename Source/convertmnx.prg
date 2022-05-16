@@ -34,7 +34,7 @@ define class ProcessMNX as Custom
 			do case
 				case OBJTYPE = 1
 					loMenu = This.HandleMenu()
-				case OBJTYPE = 3 and OBJCODE = 77
+				case OBJTYPE = 3 and (OBJCODE = 77 or LEVELNAME = '_MSYSMENU')
 					This.HandlePad(loMenu)
 			endcase
 		endscan
@@ -50,8 +50,10 @@ define class ProcessMNX as Custom
 
 	function HandleMenu()
 		local loMenu
-		loMenu = newobject('SFMenu', 'SFMenu.vcx', '', This.cMenuVariable)
-*** TODO: handle PROCEDURE, SETUP, and CLEANUP
+		loMenu          = newobject('SFMenu', 'SFMenu.vcx', '', This.cMenuVariable)
+		loMenu.cSetup   = SETUP
+		loMenu.cCleanup = CLEANUP
+*** TODO: handle PROCEDURE
 		return loMenu
 	endfunc
 
@@ -59,6 +61,7 @@ define class ProcessMNX as Custom
 
 	function HandlePad(toMenu)
 		local lcName, ;
+			lcClass, ;
 			loPad, ;
 			lnBars, ;
 			lnI
@@ -74,7 +77,8 @@ define class ProcessMNX as Custom
 
 * Add the pad and set its properties.
 
-		loPad = toMenu.AddPad('SFPad', 'SFMenu.vcx', lcName)
+		lcClass = iif(OBJCODE = 67, 'SFPadCommand', 'SFPad')
+		loPad   = toMenu.AddPad(lcClass, 'SFMenu.vcx', lcName)
 		This.SetupPad(loPad)
 
 * Handle the popup record.
@@ -84,7 +88,9 @@ define class ProcessMNX as Custom
 
 * Handle the bar records.
 
-		skip
+		if not eof()
+			skip
+		endif not eof()
 		for lnI = 1 to lnBars
 			This.HandleBar(loPad)
 			if lnI < lnBars
@@ -103,6 +109,9 @@ define class ProcessMNX as Custom
 			.cStatusBarText = MESSAGE
 			.cSkipFor       = SKIPFOR
 			.Comment        = COMMENT
+			if OBJCODE = 67
+				.cOnClickCommand = COMMAND
+			endif OBJCODE = 67
 		endwith
 *** TODO: handle cContainerPosition and cObjectPosition for NEGOTIATE clause (LOCATION field)
 		return
@@ -245,10 +254,12 @@ enddefine
 define class MenuClassGenerator as MenuGenerator
 	cCodeOutput = ''
 	cComment    = '*' + replicate('=', 79)
+	cPRGName    = ''
 
 * Generate the menu.
 
-	function GenerateMenu(toMenu)
+	function GenerateMenu(toMenu, tcPRGName)
+		This.cPRGName = tcPRGName
 		This.HandleMenu(toMenu)
 		for each loPad in toMenu foxobject
 			This.HandlePad(loPad)
@@ -264,14 +275,32 @@ define class MenuClassGenerator as MenuGenerator
 		lcPads = ''
 		for each loPad in toMenu foxobject
 			lcPads = lcPads + ccTAB + ccTAB + ccTAB + ;
-				[.AddPad('] + loPad.Name + [', '', '] + loPad.Name + [')] + ;
+				[.AddPad('] + loPad.Name + [', '] + This.cPRGName + [', '] + loPad.Name + [')] + ;
 				ccCRLF
 		next loPad
 		lcPads = left(lcPads, len(lcPads) - 2)
+		if empty(toMenu.cSetup) and empty(toMenu.cCleanup)
+			lcInit = ''
+		else
+			text to lcInit textmerge noshow
+
+	procedure Init(tcInstanceName)
+		dodefault(tcInstanceName)
+		text to This.cSetup noshow
+		<<toMenu.cSetup>>
+		end*text
+		text to This.cCleanup noshow
+		<<toMenu.cCleanup>>
+		end*text
+	endproc
+			endtext
+			lcInit = strtran(lcInit, 'end*text', 'endtext')
+		endif empty(toMenu.cSetup)
 		text to lcCode textmerge noshow
 <<This.cComment>>
 define class <<This.cMenuName>> as SFMenu of SFMenu.vcx
 <<This.cComment>>
+<<lcInit>>
 	procedure DefineMenu
 		with This
 <<lcPads>>
@@ -286,6 +315,12 @@ enddefine
 * Handle a pad.
 
 	protected function HandlePad(toPad)
+		local lcProperties, ;
+			lcClick, ;
+			lcBars, ;
+			lcBarClasses, ;
+			loBar, ;
+			lcCode
 
 * Get the values of the non-default properties.
 
@@ -304,6 +339,18 @@ enddefine
 			This.GetCodeForProperty(toPad, 'lMRU', ccTAB)
 		lcProperties = lcProperties + ;
 			This.GetCodeForProperty(toPad, 'Comment', ccTAB)
+		do case
+			case not pemstatus(toPad, 'cOnClickCommand', 5)
+				lcClick = ''
+			case chr(13) $ toPad.cOnClickCommand
+				lcClick = ccCRLF + ccCRLF + ccTAB + 'procedure Click' + ccCRLF + ;
+					ccTAB + ccTAB + toPad.cOnClickCommand + ccCRLF + ccTAB + ;
+					'endproc'
+			otherwise
+				lcProperties = lcProperties + ;
+					This.GetCodeForProperty(toPad, 'cOnClickCommand', ccTAB)
+				lcClick = ''
+		endcase
 
 * Get the bar definitions.
 
@@ -315,7 +362,7 @@ enddefine
 					[.AddSeparatorBar()] + ccCRLF
 			else
 				lcBars = lcBars + ccTAB + ccTAB + ccTAB + ;
-					[.AddBar('] + loBar.Name + [', '', '] + loBar.Name + ;
+					[.AddBar('] + loBar.Name + [', '] + This.cPRGName + [', '] + loBar.Name + ;
 					[')] + ccCRLF
 				lcBarClasses = lcBarClasses + This.HandleBar(loBar) + ccCRLF
 			endif lower(loBar.Class) = 'sfseparatorbar'
@@ -329,7 +376,7 @@ enddefine
 <<This.cComment>>
 define class <<toPad.Name>> as SFPad of SFMenu.vcx
 <<This.cComment>>
-<<lcProperties>>
+<<lcProperties>><<lcClick>>
 	procedure AddBars
 		with This
 <<lcBars>>
@@ -441,6 +488,8 @@ enddefine
 					lcCode = lcCode + transform(luValue)
 				case left(luValue, 1) = '"'
 					lcCode = lcCode + '[' + substr(luValue, 2, len(luValue) - 2) + ']'
+				case '[' $ luValue
+					lcCode = lcCode + '"' + luValue + '"'
 				otherwise
 					lcCode = lcCode + '[' + luValue + ']'
 			endcase

@@ -1,0 +1,5 @@
+appName = OOP Menu Project
+appID = MenuProject
+majorVersion = 1.0
+excludeFiles = *.fxp,*.md,.gitignore,*.doc,*.zip,*.htm,*_recover.*,*.hhp,*.hhk,*.hhc,*.xml
+excludeFolders = *ThorUpdater*,*HTMLHelp*,*Documentation*,*Testing*

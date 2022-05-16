@@ -2,7 +2,7 @@
 
 **Provides object-oriented menus for use in Visual FoxPro 9.0 development**
 
-Project Manager: [Doug Hennig](mailto:dhennig@stonefield.com)
+Project Manager: [Doug Hennig](mailto:dhennig@stonefieldquery.com)
 
 One of the last bastions of procedural code in VFP is the menu system. While we're somewhat insulated from typing DEFINE PAD and DEFINE BAR statements using the Menu Designer, having a hard-coded MPR file that defines an application's menu is far from ideal. Here are a few reasons:
 
@@ -39,6 +39,10 @@ See the files in the Documentation folder, starting with [Overview of the Classe
 See [How to contribute to OOP Menu](.github/CONTRIBUTING.md) for details on how to help with this project.
 
 ## Releases
+
+### 2022-05-26
+
+* Added support for Setup and Cleanup code in ConvertMNX.prg and fixed other minor conversion issues.
 
 ### 2019-06-27
 
