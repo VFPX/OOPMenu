@@ -91,12 +91,16 @@ define class ProcessMNX as Custom
 		if not eof()
 			skip
 		endif not eof()
-		for lnI = 1 to lnBars
-			This.HandleBar(loPad)
-			if lnI < lnBars
+		lnI = 1
+		do while lnI <= lnBars
+			llHandled = This.HandleBar(loPad)
+			if lnI < lnBars or not llHandled
 				skip
-			endif lnI < lnBars
-		next lnI
+			endif lnI < lnBars ...
+			if llHandled
+				lnI = lnI + 1
+			endif llHandled
+		enddo while lnI <= lnBars
 		return
 	endfunc
 
@@ -133,43 +137,51 @@ define class ProcessMNX as Custom
 * Handle a bar.
 
 	function HandleBar(toPad)
-		local lcName, ;
+		local llReturn, ;
+			lcName, ;
 			loBar
+		llReturn = .T.
+		do case
 
 * If this is a separator bar, add one to the pad.
 
-		if PROMPT == '\-'
-			toPad.AddSeparatorBar()
-		else
+			case PROMPT == '\-'
+				toPad.AddSeparatorBar()
+
+* If this is an empty submenu (usually following a separator bar), skip it.
+
+			case OBJTYPE = 2 and NUMITEMS = 0
+				llReturn = .F.
 
 * Get the name for the bar. Note that some reserved words (e.g. _MFI*) aren't
 * valid member names (AddBar adds the bar as a member with the specified name)
 * so strip the leading underscore.
 
-			lcName = NAME
-			do case
-				case empty(lcName)
-					lcName = toPad.Name + 'Bar' + alltrim(ITEMNUM)
-				case upper(left(lcName, 2)) = '_M'
-					lcName = substr(lcName, 2)
-			endcase
+			otherwise
+				lcName = NAME
+				do case
+					case empty(lcName)
+						lcName = toPad.Name + 'Bar' + alltrim(ITEMNUM)
+					case upper(left(lcName, 2)) = '_M'
+						lcName = substr(lcName, 2)
+				endcase
 
 * Add the bar and set its properties based on the type of bar.
 
-			loBar = toPad.AddBar('SFBar', 'SFMenu.vcx', lcName)
-			This.SetupBar(loBar)
-			do case
-				case OBJCODE = 67
-					This.HandleCommandBar(loBar)
-				case OBJCODE = 77
-					This.HandleSubMenu(loBar)
-				case OBJCODE = 78
-					This.HandleSystemBar(loBar)
-				case OBJCODE = 80
-					This.HandleProcedureBar(loBar)
-			endcase
-		endif PROMPT == '\-'
-		return
+				loBar = toPad.AddBar('SFBar', 'SFMenu.vcx', lcName)
+				This.SetupBar(loBar)
+				do case
+					case OBJCODE = 67
+						This.HandleCommandBar(loBar)
+					case OBJCODE = 77
+						This.HandleSubMenu(loBar)
+					case OBJCODE = 78
+						This.HandleSystemBar(loBar)
+					case OBJCODE = 80
+						This.HandleProcedureBar(loBar)
+				endcase
+		endcase
+		return llReturn
 	endfunc
 
 * Handle a command bar.

@@ -77,3 +77,5 @@ oMenu.Show()
 ```
 
 oMenu must be global so it lives throughout the application.
+
+> Note: ConvertMNX.prg isn't complete: it doesn't handle procedures within menus and doesn't handle the NEGOTIATE setting for bars.

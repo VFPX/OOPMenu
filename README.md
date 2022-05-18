@@ -40,7 +40,11 @@ See [How to contribute to OOP Menu](.github/CONTRIBUTING.md) for details on how 
 
 ## Releases
 
-### 2022-05-26
+### 2022-05-18
+
+* Fixed an issue with separator bars marked as "Submenu" when converting an MNX.
+
+### 2022-05-16
 
 * Added support for Setup and Cleanup code in ConvertMNX.prg and fixed other minor conversion issues.
 
