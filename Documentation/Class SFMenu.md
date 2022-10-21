@@ -14,6 +14,12 @@ oMenu.Item(3)
 
 When you instantiate SFMenu (or a subclass) into an object, pass the name of that object to the Init method; this is needed so the complete hierarchy can be used in methods of other menu objects. See the example below.
 
+> Note: the object that contains the menu must be a public variable; it cannot be a member of an object since you can't use "This" in the menuing system. For example, the following will not work (you will get an error when you click a menu item):
+
+```foxpro
+This.oMenu = newobject('SFMenu', 'SFMenu.vcx', '', 'This.oMenu')
+```
+
 There are a couple of ways you can add pads to the menu:
 
 * Manually add pad objects using the AddPad method. This can be done in code that instantiates the menu object or, in a subclass of SFMenu, in the DefineMenu method.

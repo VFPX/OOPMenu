@@ -1230,6 +1230,7 @@ DEFINE CLASS sfmenubase AS collection
 		*m: release		&& Releases the object
 		*m: releasemembers		&& Abstract method to nuke member references
 		*p: cerrormessage		&& The text of an error message
+		*p: cversion		&& The version number (the date formatted as YYYY.MM.DD).
 		*p: lautoassignhotkey		&& .T. to auto-assign a hotkey if once isn't specified
 		*p: lerroroccurred		&& .T. if an error occurred
 		*p: lrelease		&& .T. as the object is being released
@@ -1238,6 +1239,7 @@ DEFINE CLASS sfmenubase AS collection
 
 	PROTECTED lrelease
 	cerrormessage = 		&& The text of an error message
+	cversion = 2022.05.18		&& The version number (the date formatted as YYYY.MM.DD).
 	Height = 23
 	lautoassignhotkey = .F.		&& .T. to auto-assign a hotkey if once isn't specified
 	lerroroccurred = .F.		&& .T. if an error occurred
@@ -1256,6 +1258,7 @@ DEFINE CLASS sfmenubase AS collection
 		<memberdata name="calledfromthisclass" type="method" display="CalledFromThisClass"/>
 		<memberdata name="getkeyname" display="GetKeyName"/>
 		<memberdata name="lautoassignhotkey" display="lAutoAssignHotKey"/>
+		<memberdata name="cversion" display="cVersion"/>
 		</VFPData>		&& XML Metadata for customizable properties
 	
 	PROCEDURE about		&& Provides documentation for the class
