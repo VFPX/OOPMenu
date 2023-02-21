@@ -761,19 +761,31 @@ DEFINE CLASS sfbar AS sfmenubase OF "sfmenu.vcx" 		&& A bar in a popup
 	ENDPROC
 
 	PROCEDURE show		&& Displays the bar
-		local lnI, ;
+		local llVisible, ;
+			loParent, ;
+			lnI, ;
 			loBar
 		with This
+		
+		* See if we and our parents are visible.
+		
+			llVisible = .lVisible
+			loParent  = .oParent
+			do while llVisible and vartype(loParent) = 'O' and ;
+				pemstatus(loParent, 'lVisible', 5)
+				llVisible = llVisible and loParent.lVisible
+				loParent  = loParent.oParent
+			enddo while llVisible ...
 		
 		* If we're supposed to, call FindBarPosition to see where the bar should go,
 		* then define it.
 		
-			if .lVisible and not .lDefined
+			if llVisible and not .lDefined
 				if (.lSpecified or .lInvert) and not .lShortcut
 					.FindBarPosition()
 				endif .lSpecified ...
 				.Define()
-			endif .lVisible ...
+			endif llVisible ...
 		
 		* Display any bars in our submenu if there is one.
 		
@@ -1239,7 +1251,7 @@ DEFINE CLASS sfmenubase AS collection
 
 	PROTECTED lrelease
 	cerrormessage = 		&& The text of an error message
-	cversion = 2022.05.18		&& The version number (the date formatted as YYYY.MM.DD).
+	cversion = 2023.02.21		&& The version number (the date formatted as YYYY.MM.DD).
 	Height = 23
 	lautoassignhotkey = .F.		&& .T. to auto-assign a hotkey if once isn't specified
 	lerroroccurred = .F.		&& .T. if an error occurred
