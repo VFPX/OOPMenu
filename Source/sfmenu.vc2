@@ -1251,7 +1251,7 @@ DEFINE CLASS sfmenubase AS collection
 
 	PROTECTED lrelease
 	cerrormessage = 		&& The text of an error message
-	cversion = 2023.02.21		&& The version number (the date formatted as YYYY.MM.DD).
+	cversion = 2023.02.22		&& The version number (the date formatted as YYYY.MM.DD).
 	Height = 23
 	lautoassignhotkey = .F.		&& .T. to auto-assign a hotkey if once isn't specified
 	lerroroccurred = .F.		&& .T. if an error occurred
@@ -2767,28 +2767,30 @@ DEFINE CLASS sfpad AS sfmenubase OF "sfmenu.vcx" 		&& A pad in a menu
 		local lnI, ;
 			loBar
 		with This
-			do case
+			if .lVisible
+				do case
 		
 		* If the pad has never been defined, call Define.
 		
-				case not .lDefined
-					.Define()
+					case not .lDefined
+						.Define()
 		
 		* If the pad has been defined but then released, call DefinePopup and
 		* DefinePad.
 		
-				case not .lPadDefined
-					.DefinePopup()
-					.DefinePad()
-			endcase
-			for lnI = 1 to .Count
-				loBar = .Item(lnI)
-				if loBar.lInvert
-					loBar.Hide()
-				else
-					loBar.Show()
-				endif loBar.lInvert
-			next lnI
+					case not .lPadDefined
+						.DefinePopup()
+						.DefinePad()
+				endcase
+				for lnI = 1 to .Count
+					loBar = .Item(lnI)
+					if loBar.lInvert
+						loBar.Hide()
+					else
+						loBar.Show()
+					endif loBar.lInvert
+				next lnI
+			endif .lVisible
 		endwith
 		
 	ENDPROC

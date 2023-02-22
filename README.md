@@ -40,6 +40,10 @@ See [How to contribute to OOP Menu](.github/CONTRIBUTING.md) for details on how 
 
 ## Releases
 
+### 2023-02-22
+
+* Fixed an issue with a pad with lVisible initially set to .F appearing in the menu.
+
 ### 2023-02-21
 
 * Fixed an issue with a visible bar that's a subitem of an invisible bar.
