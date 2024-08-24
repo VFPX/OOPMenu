@@ -40,6 +40,10 @@ See [How to contribute to OOP Menu](.github/CONTRIBUTING.md) for details on how 
 
 ## Releases
 
+### 2024-08-24
+
+* SFPad.Hide no longer sets lVisible to .T.
+
 ### 2023-02-22
 
 * Fixed an issue with a pad with lVisible initially set to .F appearing in the menu.
